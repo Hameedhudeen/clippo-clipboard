@@ -39,7 +39,7 @@ printf '%s\n' \
   'Type=Application' \
   'Name=Clippo' \
   'Comment=Native clipboard manager' \
-  'Exec=clippo-linux' \
+  'Exec=clippo-linux --show-history' \
   'Icon=app.clippo.Clippo' \
   'Terminal=false' \
   'Categories=Utility;' \

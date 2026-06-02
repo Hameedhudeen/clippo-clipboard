@@ -28,7 +28,7 @@ printf '%s\n' \
   'Type=Application' \
   'Name=Clippo' \
   'Comment=Native clipboard manager' \
-  'Exec=clippo-linux' \
+  'Exec=clippo-linux --show-history' \
   'Icon=app.clippo.Clippo' \
   'Terminal=false' \
   'Categories=Utility;' \
@@ -65,6 +65,9 @@ cp "$repo_root/assets/icon.svg" "$appdir/app.clippo.Clippo.svg"
 printf '%s\n' \
   '#!/usr/bin/env bash' \
   'set -euo pipefail' \
+  'if [[ "$#" -eq 0 ]]; then' \
+  '  exec "$APPDIR/usr/bin/clippo-linux" --show-history' \
+  'fi' \
   'exec "$APPDIR/usr/bin/clippo-linux" "$@"' \
   > "$appdir/AppRun"
 chmod +x "$appdir/AppRun"

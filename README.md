@@ -37,7 +37,7 @@ Clippo is currently a pre-alpha open-source project. The shared Rust core and na
 | Shared Rust core | Implemented for history, search, settings, privacy, persistence, commands, lifecycle, localization keys, and diagnostics. |
 | macOS shell | SwiftUI/AppKit scaffold exists; runtime validation still needs macOS and Xcode. |
 | Windows shell | WinForms scaffold exists; runtime validation still needs Windows and the .NET desktop workload. |
-| Linux shell | Rust fallback shell exists for X11/Wayland clipboard paths, zenity dialogs, desktop actions, autostart, Wayland shortcut portal daemon, and Linux package artifacts. |
+| Linux shell | Rust fallback shell exists for X11/Wayland clipboard paths, zenity dialogs with notification fallback, desktop actions, autostart, Wayland shortcut portal daemon, and Linux package artifacts. |
 | Releases | `v0.1.0` Linux pre-alpha artifacts are published for testing; stable cross-platform releases are pending. |
 
 ## Screenshots

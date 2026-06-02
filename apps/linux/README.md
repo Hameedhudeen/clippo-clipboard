@@ -39,12 +39,13 @@ The shell has a tested popup placement helper that clamps the popup inside the a
 
 ## Fallback Dialogs
 
-Until the full GTK4/libadwaita shell is implemented, `clippo-linux --show-history` opens a focused zenity search entry first, filters the persisted Linux shell history, then opens a compact zenity list dialog. The fallback dialog supports keyboard navigation through the native list behavior: type the search term, press Enter, move through results with arrow keys, and press Enter to choose an action for the selected item. The action dialog exposes copy, paste, paste without formatting, show full text, pin or unpin, and delete. Empty search returns the full history. `clippo-linux --preferences` opens a zenity info dialog with the current Linux shell state.
+Until the full GTK4/libadwaita shell is implemented, `clippo-linux --show-history` opens a focused zenity search entry first, filters the persisted Linux shell history, then opens a compact zenity list dialog. Launching `clippo-linux` with no arguments also opens the history path so desktop launchers do something visible. The fallback dialog supports keyboard navigation through the native list behavior: type the search term, press Enter, move through results with arrow keys, and press Enter to choose an action for the selected item. The action dialog exposes copy, paste, paste without formatting, show full text, pin or unpin, and delete. Empty search returns the full history. `clippo-linux --preferences` opens a zenity info dialog with the current Linux shell state. If zenity is unavailable in a package, Clippo falls back to a desktop notification instead of exiting silently.
 
 ## Local Shell Commands
 
 - `clippo-linux --enable-autostart` writes `clippo.desktop` under the XDG autostart directory.
 - `clippo-linux --disable-autostart` removes Clippo from XDG autostart.
+- `clippo-linux --status` prints diagnostic shell, clipboard, shortcut, and popup placement status.
 - `clippo-linux --install-x11-shortcut` writes a managed `~/.xbindkeysrc` block for `Super+Shift+C` to run `clippo-linux --show-history`, `Super+Comma` to run `clippo-linux --preferences`, `Super+Control+Delete` to clear unpinned history, `Super+Shift+Control+Delete` to clear all history, `Super+1..9` to copy, `Super+Alt+1..9` to paste, `Super+Shift+Alt+1..9` to paste plain text, `Super+Shift+1..9` to pin or unpin, and `Super+Control+1..9` to delete.
 - `clippo-linux --show-history` is the command target used by desktop actions and global shortcuts.
 - `clippo-linux --copy-shortcut=<number>`, `--paste-shortcut=<number>`, `--paste-plain-shortcut=<number>`, `--toggle-pin-shortcut=<number>`, and `--delete-shortcut=<number>` resolve persisted pinned or visible row shortcuts for fallback keyboard workflows.

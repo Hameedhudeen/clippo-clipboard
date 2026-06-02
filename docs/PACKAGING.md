@@ -40,9 +40,9 @@ Run `scripts/package-preflight.sh` on a packaging host before building artifacts
 
 ## Linux Plan
 
-- AppImage: broad early testing artifact. Run `scripts/package-linux-appimage.sh` to prepare an AppDir; it emits an AppImage when `appimagetool` is installed.
+- AppImage: broad early testing artifact. Run `scripts/package-linux-appimage.sh` to prepare an AppDir; it emits an AppImage when `appimagetool` is installed. The AppRun wrapper opens history by default and accepts `--status` for diagnostic smoke checks.
 - Flatpak: preferred if portal integration works cleanly. The manifest lives in `packaging/flatpak/app.clippo.Clippo.yml`; run `scripts/package-linux-flatpak.sh` on a host with `flatpak-builder` to build it. For local install testing, export a repo with `flatpak-builder --repo=dist/linux/flatpak-repo` and install it with `flatpak --user install`.
-- `.deb`: useful for Debian/Ubuntu users and direct portfolio demos. Local package scaffold: run `scripts/package-linux-deb.sh` to build `dist/linux/clippo_<version>_amd64.deb`.
+- `.deb`: useful for Debian/Ubuntu users and direct portfolio demos. Local package scaffold: run `scripts/package-linux-deb.sh` to build `dist/linux/clippo_<version>_amd64.deb`. Desktop launch opens Clippo history; use `clippo-linux --status` for terminal diagnostics.
 - Snap: deferred unless user demand appears.
 
 ## Updates

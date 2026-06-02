@@ -17,6 +17,14 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let autostart = XdgAutostart::from_environment();
     let state_store = LinuxShellStateStore::from_environment();
+    if should_open_history_by_default(&args) {
+        show_history(&state_store);
+        return;
+    }
+    if args.iter().any(|arg| arg == "--status") {
+        print_status(&autostart, &state_store);
+        return;
+    }
     if handle_shell_command(&args, &autostart, &state_store) {
         return;
     }
@@ -33,6 +41,10 @@ fn handle_shell_command(
         || handle_history_command(args, state_store)
         || handle_state_command(args, state_store)
         || handle_clipboard_command(args, state_store)
+}
+
+fn should_open_history_by_default(args: &[String]) -> bool {
+    args.len() == 1
 }
 
 fn handle_autostart_command(args: &[String], autostart: &XdgAutostart) -> bool {
@@ -1751,7 +1763,14 @@ struct ZenityDialog;
 impl ZenityDialog {
     fn info(title: &str, text: &str) -> io::Result<bool> {
         let command = zenity_info_command(title, text);
-        run_dialog_command(&command)
+        match run_dialog_command(&command) {
+            Ok(result) => Ok(result),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                eprintln!("Could not show dialog: zenity is unavailable.");
+                notify(title, text)
+            }
+            Err(error) => Err(error),
+        }
     }
 
     fn search_query() -> io::Result<Option<String>> {
@@ -1761,7 +1780,10 @@ impl ZenityDialog {
                 String::from_utf8_lossy(&output.stdout).trim().to_string(),
             )),
             Ok(_) => Ok(None),
-            Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(Some(String::new())),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                notify_missing_dialog_backend("history search dialog");
+                Ok(None)
+            }
             Err(error) => Err(error),
         }
     }
@@ -1774,7 +1796,10 @@ impl ZenityDialog {
                 Ok(history.iter().find(|item| item.text == selected).cloned())
             }
             Ok(_) => Ok(None),
-            Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(None),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                notify_missing_dialog_backend("history list dialog");
+                Ok(None)
+            }
             Err(error) => Err(error),
         }
     }
@@ -1787,7 +1812,10 @@ impl ZenityDialog {
                 Ok(HistoryAction::from_label(&selected))
             }
             Ok(_) => Ok(None),
-            Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(Some(HistoryAction::Copy)),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                notify_missing_dialog_backend("history action dialog");
+                Ok(None)
+            }
             Err(error) => Err(error),
         }
     }
@@ -1944,9 +1972,16 @@ fn zenity_history_action_command(pinned: bool) -> DialogCommand {
 fn run_dialog_command(command: &DialogCommand) -> io::Result<bool> {
     match Command::new(command.program).args(&command.args).status() {
         Ok(status) => Ok(status.success()),
-        Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(false),
         Err(error) => Err(error),
     }
+}
+
+fn notify_missing_dialog_backend(context: &str) {
+    eprintln!("Could not show {context}: zenity is unavailable.");
+    let _ = notify(
+        "Dialog unavailable",
+        "Clippo could not open its temporary Linux dialog backend in this package.",
+    );
 }
 
 fn desktop_entry(executable_path: &Path) -> String {
@@ -2417,6 +2452,17 @@ mod tests {
     }
 
     #[test]
+    fn no_args_open_history_by_default_but_status_is_explicit() {
+        assert!(should_open_history_by_default(
+            &["clippo-linux".to_string()]
+        ));
+        assert!(!should_open_history_by_default(&[
+            "clippo-linux".to_string(),
+            "--status".to_string()
+        ]));
+    }
+
+    #[test]
     fn xbindkeys_block_installs_open_history_shortcut() {
         let block = xbindkeys_block(Path::new("/usr/bin/clippo-linux"));
         assert!(block.contains("\"/usr/bin/clippo-linux --show-history\""));
@@ -2805,6 +2851,16 @@ mod tests {
             .args
             .contains(&"Search clipboard history".to_string()));
         assert!(command.args.contains(&"--entry-text".to_string()));
+    }
+
+    #[test]
+    fn missing_dialog_command_reports_not_found() {
+        let command = DialogCommand {
+            program: "clippo-definitely-missing-dialog-command",
+            args: Vec::new(),
+        };
+        let error = run_dialog_command(&command).expect_err("missing dialog should error");
+        assert_eq!(error.kind(), io::ErrorKind::NotFound);
     }
 
     #[test]
