@@ -1,0 +1,39 @@
+- name: bug
+  color: d73a4a
+  description: Something is broken.
+- name: enhancement
+  color: a2eeef
+  description: New feature or improvement.
+- name: documentation
+  color: 0075ca
+  description: Documentation work.
+- name: good first issue
+  color: 7057ff
+  description: Good for new contributors.
+- name: help wanted
+  color: 008672
+  description: Maintainer welcomes external help.
+- name: parity
+  color: fbca04
+  description: Maccy parity gap or behavior comparison.
+- name: platform: macos
+  color: cfd3d7
+  description: macOS-specific work.
+- name: platform: windows
+  color: cfd3d7
+  description: Windows-specific work.
+- name: platform: linux
+  color: cfd3d7
+  description: Linux-specific work.
+- name: security
+  color: b60205
+  description: Security or privacy work.
+- name: performance
+  color: fef2c0
+  description: Performance or resource usage work.
+- name: validation
+  color: 5319e7
+  description: Evidence for OS, packaging, UI, accessibility, or release gates.
+- name: release
+  color: 0052cc
+  description: Release packaging, artifacts, signing, checksums, or publishing.

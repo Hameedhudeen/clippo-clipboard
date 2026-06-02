@@ -1,0 +1,21 @@
+[package]
+name = "clippo-persistence"
+version = "0.0.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+clippo-core = { path = "../clippo-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+default = ["json"]
+json = []
+
+[lints]
+workspace = true

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Clippo icon</title>
+  <desc id="desc">A compact clipboard mark with layered clips.</desc>
+  <defs>
+    <linearGradient id="bg" x1="128" y1="128" x2="896" y2="896" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#14b8a6"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="300" y1="210" x2="730" y2="830" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dbeafe"/>
+    </linearGradient>
+  </defs>
+  <rect x="96" y="96" width="832" height="832" rx="192" fill="url(#bg)"/>
+  <rect x="316" y="196" width="392" height="104" rx="52" fill="#0f172a" opacity="0.22"/>
+  <rect x="356" y="172" width="312" height="112" rx="56" fill="#f8fafc"/>
+  <rect x="252" y="260" width="520" height="596" rx="72" fill="#0f172a" opacity="0.18"/>
+  <rect x="292" y="236" width="520" height="596" rx="72" fill="url(#paper)"/>
+  <rect x="376" y="378" width="352" height="48" rx="24" fill="#1e293b" opacity="0.78"/>
+  <rect x="376" y="500" width="280" height="48" rx="24" fill="#1e293b" opacity="0.58"/>
+  <rect x="376" y="622" width="332" height="48" rx="24" fill="#1e293b" opacity="0.42"/>
+  <circle cx="314" cy="746" r="74" fill="#f59e0b"/>
+  <path d="M314 700l14 29 32 5-23 23 5 32-28-15-29 15 6-32-24-23 32-5z" fill="#fff7ed"/>
+</svg>

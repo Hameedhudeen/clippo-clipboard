@@ -1,0 +1,33 @@
+[Desktop Entry]
+Type=Application
+Name=Clippo
+Comment=Native clipboard manager
+Exec=clippo-linux
+Icon=app.clippo.Clippo
+Terminal=false
+Categories=Utility;
+Actions=OpenHistory;PauseCapture;IgnoreNextCopy;ClearUnpinned;ClearAll;Preferences;
+
+[Desktop Action OpenHistory]
+Name=Open History
+Exec=clippo-linux --show-history
+
+[Desktop Action PauseCapture]
+Name=Pause Capture
+Exec=clippo-linux --pause-capture
+
+[Desktop Action IgnoreNextCopy]
+Name=Ignore Next Copy
+Exec=clippo-linux --ignore-next-copy
+
+[Desktop Action ClearUnpinned]
+Name=Clear Unpinned
+Exec=clippo-linux --clear-unpinned
+
+[Desktop Action ClearAll]
+Name=Clear All
+Exec=clippo-linux --clear-all
+
+[Desktop Action Preferences]
+Name=Preferences
+Exec=clippo-linux --preferences

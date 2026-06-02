@@ -1,0 +1,26 @@
+app-id: app.clippo.Clippo
+runtime: org.gnome.Platform
+runtime-version: '46'
+sdk: org.gnome.Sdk
+command: clippo-linux
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --talk-name=org.freedesktop.Notifications
+  - --filesystem=xdg-config/clippo:create
+modules:
+  - name: clippo
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 clippo-linux /app/bin/clippo-linux
+      - install -Dm644 app.clippo.Clippo.desktop /app/share/applications/app.clippo.Clippo.desktop
+      - install -Dm644 app.clippo.Clippo.svg /app/share/icons/hicolor/scalable/apps/app.clippo.Clippo.svg
+    sources:
+      - type: file
+        path: ../../target/release/clippo-linux
+      - type: file
+        path: app.clippo.Clippo.desktop
+      - type: file
+        path: ../../assets/icon.svg
+        dest-filename: app.clippo.Clippo.svg

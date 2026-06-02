@@ -1,0 +1,13 @@
+[package]
+name = "clippo-bench"
+version = "0.0.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+clippo-core = { path = "../../crates/clippo-core" }
+clippo-persistence = { path = "../../crates/clippo-persistence" }
+
+[lints]
+workspace = true

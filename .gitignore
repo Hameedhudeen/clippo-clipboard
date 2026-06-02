@@ -1,0 +1,56 @@
+# Rust
+/target/
+**/*.rs.bk
+
+# Swift / Xcode
+.build/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
+
+# .NET / Windows
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Linux packaging
+/dist/
+*.AppImage
+*.deb
+*.rpm
+*.flatpak
+*.snap
+
+# Internal planning and local reference material
+/tasks.md
+/references/
+.agents/
+.codex/
+
+# Validation logs generated on target hosts.
+# Keep the public guidance and template committed.
+/docs/validation/*.md
+!/docs/validation/README.md
+!/docs/validation/TEMPLATE.md
+
+# Logs and diagnostics
+*.log
+logs/
+diagnostics/
+
+# Editors and OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Local environment
+.env
+.env.*
+!.env.example
