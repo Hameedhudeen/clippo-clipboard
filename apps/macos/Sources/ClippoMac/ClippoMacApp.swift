@@ -526,29 +526,18 @@ final class GlobalHotKey {
     private var eventHandlerRef: EventHandlerRef?
     private let hotKeyID: UInt32
 
+    fileprivate static func invoke(hotKeyID: UInt32) {
+        handlers[hotKeyID]?()
+    }
+
     init?(keyCode: UInt32, modifiers: UInt32, handler: @escaping () -> Void) {
         hotKeyID = UInt32.random(in: 1...UInt32.max)
         Self.handlers[hotKeyID] = handler
 
         var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
-        let callback: EventHandlerUPP = { _, event, _ in
-            var hotKeyID = EventHotKeyID()
-            GetEventParameter(
-                event,
-                EventParamName(kEventParamDirectObject),
-                EventParamType(typeEventHotKeyID),
-                nil,
-                MemoryLayout<EventHotKeyID>.size,
-                nil,
-                &hotKeyID
-            )
-            Self.handlers[hotKeyID.id]?()
-            return noErr
-        }
-
         let installStatus = InstallEventHandler(
             GetApplicationEventTarget(),
-            callback,
+            clippoGlobalHotKeyCallback,
             1,
             &eventType,
             nil,
@@ -559,7 +548,7 @@ final class GlobalHotKey {
             return nil
         }
 
-        var carbonHotKeyID = EventHotKeyID(signature: fourCharCode("CLPO"), id: hotKeyID)
+        let carbonHotKeyID = EventHotKeyID(signature: fourCharCode("CLPO"), id: hotKeyID)
         let registerStatus = RegisterEventHotKey(
             keyCode,
             modifiers,
@@ -589,6 +578,28 @@ final class GlobalHotKey {
     deinit {
         unregister()
     }
+}
+
+private func clippoGlobalHotKeyCallback(
+    _: EventHandlerCallRef?,
+    _ event: EventRef?,
+    _: UnsafeMutableRawPointer?
+) -> OSStatus {
+    guard let event else {
+        return noErr
+    }
+    var hotKeyID = EventHotKeyID()
+    GetEventParameter(
+        event,
+        EventParamName(kEventParamDirectObject),
+        EventParamType(typeEventHotKeyID),
+        nil,
+        MemoryLayout<EventHotKeyID>.size,
+        nil,
+        &hotKeyID
+    )
+    GlobalHotKey.invoke(hotKeyID: hotKeyID.id)
+    return noErr
 }
 
 private func fourCharCode(_ string: String) -> OSType {
