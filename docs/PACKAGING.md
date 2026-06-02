@@ -1,6 +1,6 @@
 # Packaging And Distribution
 
-Clippo does not ship installable artifacts yet. This document records v1 packaging decisions before platform shells are implemented.
+Clippo is still pre-alpha, but local Linux packaging paths now exist for tester builds. This document records the release packaging decisions and the validation still required before stable distribution.
 
 ## Package Identity
 
@@ -41,7 +41,7 @@ Run `scripts/package-preflight.sh` on a packaging host before building artifacts
 ## Linux Plan
 
 - AppImage: broad early testing artifact. Run `scripts/package-linux-appimage.sh` to prepare an AppDir; it emits an AppImage when `appimagetool` is installed.
-- Flatpak: preferred if portal integration works cleanly. Initial manifest lives in `packaging/flatpak/app.clippo.Clippo.yml`; run `scripts/package-linux-flatpak.sh` on a host with `flatpak-builder` to build it. It still needs `flatpak-builder` validation and portal behavior testing before release.
+- Flatpak: preferred if portal integration works cleanly. The manifest lives in `packaging/flatpak/app.clippo.Clippo.yml`; run `scripts/package-linux-flatpak.sh` on a host with `flatpak-builder` to build it. For local install testing, export a repo with `flatpak-builder --repo=dist/linux/flatpak-repo` and install it with `flatpak --user install`.
 - `.deb`: useful for Debian/Ubuntu users and direct portfolio demos. Local package scaffold: run `scripts/package-linux-deb.sh` to build `dist/linux/clippo_<version>_amd64.deb`.
 - Snap: deferred unless user demand appears.
 
@@ -51,7 +51,7 @@ The initial release should use GitHub Releases for downloads. Auto-update is a p
 
 ## Signing And Checksums
 
-v1 artifacts should be signed where practical and always published with checksums. Run `scripts/generate-checksums.sh dist` after packaging to write `dist/SHA256SUMS`. The GitHub release workflow stages Rust artifacts under `dist/release` and uploads a `SHA256SUMS` file with each OS artifact bundle.
+v1 artifacts should be signed where practical and always published with checksums. Run `scripts/generate-checksums.sh dist` after packaging to write `dist/SHA256SUMS`, or run it against a release-only staging folder to avoid hashing unpacked build directories. The GitHub release workflow stages Rust artifacts under `dist/release` and uploads a `SHA256SUMS` file with each OS artifact bundle.
 
 ## SBOM
 

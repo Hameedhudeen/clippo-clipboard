@@ -4,6 +4,15 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
+#[cfg(target_os = "linux")]
+use std::collections::HashMap;
+
+#[cfg(target_os = "linux")]
+use zbus::{
+    blocking::{Connection, Proxy},
+    zvariant::{OwnedObjectPath, OwnedValue, Value},
+};
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let autostart = XdgAutostart::from_environment();
@@ -131,6 +140,10 @@ fn handle_state_command(args: &[String], state_store: &LinuxShellStateStore) -> 
     }
     if args.iter().any(|arg| arg == "--wayland-shortcuts-plan") {
         print_wayland_shortcuts_plan();
+        return true;
+    }
+    if args.iter().any(|arg| arg == "--wayland-shortcuts-daemon") {
+        run_wayland_shortcuts_daemon();
         return true;
     }
     false
@@ -418,7 +431,7 @@ fn print_wayland_shortcuts_status() {
                 version.map_or_else(String::new, |value| format!(" (version {value})"))
             );
             println!(
-                "Native shortcut binding still requires the GTK/libadwaita shell to create a portal session and listen for activation signals."
+                "Run `clippo-linux --wayland-shortcuts-daemon` to bind `Super+Shift+C` through the portal when the compositor allows it."
             );
         }
         Ok(PortalAvailability::Unavailable) => {
@@ -461,6 +474,26 @@ fn print_wayland_shortcuts_plan() {
             shortcut.id, shortcut.command
         );
     }
+}
+
+#[cfg(target_os = "linux")]
+fn run_wayland_shortcuts_daemon() {
+    let executable_path = env::current_exe().unwrap_or_else(|_| PathBuf::from("clippo-linux"));
+    let daemon = WaylandShortcutDaemon { executable_path };
+    match daemon.run() {
+        Ok(()) => {}
+        Err(error) => {
+            eprintln!("Could not run Wayland shortcut daemon: {error}");
+            println!(
+                "Fallback: configure a desktop shortcut that runs `clippo-linux --show-history`."
+            );
+        }
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn run_wayland_shortcuts_daemon() {
+    eprintln!("Wayland shortcut daemon support is only available on Linux.");
 }
 
 fn print_status(autostart: &XdgAutostart, state_store: &LinuxShellStateStore) {
@@ -844,6 +877,191 @@ impl WaylandGlobalShortcutsPortal {
             version: parse_global_shortcuts_version(text),
         }
     }
+}
+
+#[cfg(target_os = "linux")]
+struct WaylandShortcutDaemon {
+    executable_path: PathBuf,
+}
+
+#[cfg(target_os = "linux")]
+impl WaylandShortcutDaemon {
+    const OPEN_HISTORY_ID: &'static str = "open-history";
+
+    fn run(&self) -> io::Result<()> {
+        match WaylandGlobalShortcutsPortal::probe()? {
+            PortalAvailability::Available { version } => {
+                println!(
+                    "Wayland GlobalShortcuts portal is available{}.",
+                    version.map_or_else(String::new, |value| format!(" (version {value})"))
+                );
+            }
+            PortalAvailability::Unavailable => {
+                return Err(io::Error::new(
+                    io::ErrorKind::Unsupported,
+                    "Wayland GlobalShortcuts portal is unavailable",
+                ));
+            }
+        }
+
+        let connection = Connection::session().map_err(dbus_error)?;
+        let portal = Self::portal_proxy(&connection)?;
+        let session_handle = Self::create_session(&connection, &portal)?;
+        Self::bind_shortcuts(&connection, &portal, &session_handle)?;
+
+        println!("Wayland shortcut daemon is active. Press Super+Shift+C to open Clippo history.");
+
+        let mut activations = portal
+            .receive_signal_with_args("Activated", &[(1, Self::OPEN_HISTORY_ID)])
+            .map_err(dbus_error)?;
+        for activation in &mut activations {
+            let body = activation.body();
+            let (signal_session_handle, shortcut_id, _timestamp, _options): (
+                OwnedObjectPath,
+                String,
+                u64,
+                HashMap<String, OwnedValue>,
+            ) = body.deserialize().map_err(dbus_error)?;
+
+            if Self::activation_matches(&session_handle, &signal_session_handle, &shortcut_id) {
+                self.open_history()?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn portal_proxy(connection: &Connection) -> io::Result<Proxy<'_>> {
+        Proxy::new(
+            connection,
+            WaylandGlobalShortcutsPortal::DESTINATION,
+            WaylandGlobalShortcutsPortal::OBJECT_PATH,
+            WaylandGlobalShortcutsPortal::INTERFACE,
+        )
+        .map_err(dbus_error)
+    }
+
+    fn create_session(connection: &Connection, portal: &Proxy<'_>) -> io::Result<OwnedObjectPath> {
+        let handle_token = unique_portal_token("clippo_create_shortcuts");
+        let session_handle_token = unique_portal_token("clippo_shortcuts");
+        let mut options = HashMap::new();
+        options.insert("handle_token", Value::from(handle_token.as_str()));
+        options.insert(
+            "session_handle_token",
+            Value::from(session_handle_token.as_str()),
+        );
+
+        let request_handle: OwnedObjectPath = portal
+            .call("CreateSession", &(options))
+            .map_err(dbus_error)?;
+        let mut results = wait_for_request_response(connection, &request_handle)?;
+        let session_value = results.remove("session_handle").ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                "portal response did not include session_handle",
+            )
+        })?;
+
+        owned_value_to_object_path(session_value)
+    }
+
+    fn bind_shortcuts(
+        connection: &Connection,
+        portal: &Proxy<'_>,
+        session_handle: &OwnedObjectPath,
+    ) -> io::Result<()> {
+        let handle_token = unique_portal_token("clippo_bind_shortcuts");
+        let shortcuts = WaylandGlobalShortcutsPortal::default_shortcuts()
+            .into_iter()
+            .map(|shortcut| {
+                let mut properties = HashMap::new();
+                properties.insert("description", Value::from(shortcut.description));
+                properties.insert("preferred_trigger", Value::from(shortcut.preferred_trigger));
+                (shortcut.id, properties)
+            })
+            .collect::<Vec<_>>();
+        let mut options = HashMap::new();
+        options.insert("handle_token", Value::from(handle_token.as_str()));
+
+        let request_handle: OwnedObjectPath = portal
+            .call("BindShortcuts", &(session_handle, shortcuts, "", options))
+            .map_err(dbus_error)?;
+        let _results = wait_for_request_response(connection, &request_handle)?;
+        Ok(())
+    }
+
+    fn activation_matches(
+        expected_session_handle: &OwnedObjectPath,
+        signal_session_handle: &OwnedObjectPath,
+        shortcut_id: &str,
+    ) -> bool {
+        expected_session_handle == signal_session_handle && shortcut_id == Self::OPEN_HISTORY_ID
+    }
+
+    fn open_history(&self) -> io::Result<()> {
+        Command::new(&self.executable_path)
+            .arg("--show-history")
+            .status()
+            .map(|_| ())
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn wait_for_request_response(
+    connection: &Connection,
+    request_handle: &OwnedObjectPath,
+) -> io::Result<HashMap<String, OwnedValue>> {
+    let request_proxy = Proxy::new(
+        connection,
+        WaylandGlobalShortcutsPortal::DESTINATION,
+        request_handle.as_str(),
+        "org.freedesktop.portal.Request",
+    )
+    .map_err(dbus_error)?;
+    let mut responses = request_proxy
+        .receive_signal("Response")
+        .map_err(dbus_error)?;
+    let response = responses
+        .next()
+        .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "portal response ended"))?;
+    let body = response.body();
+    let (response_code, results): (u32, HashMap<String, OwnedValue>) =
+        body.deserialize().map_err(dbus_error)?;
+
+    match response_code {
+        0 => Ok(results),
+        1 => Err(io::Error::new(
+            io::ErrorKind::Interrupted,
+            "portal request was cancelled",
+        )),
+        _ => Err(io::Error::other(format!(
+            "portal request failed with response code {response_code}"
+        ))),
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn owned_value_to_object_path(value: OwnedValue) -> io::Result<OwnedObjectPath> {
+    let cloned = value.try_clone().map_err(dbus_error)?;
+    if let Ok(path) = OwnedObjectPath::try_from(cloned) {
+        Ok(path)
+    } else {
+        let session_handle = String::try_from(value).map_err(dbus_error)?;
+        OwnedObjectPath::try_from(session_handle).map_err(dbus_error)
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn unique_portal_token(prefix: &str) -> String {
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_nanos());
+    format!("{prefix}_{}_{}", std::process::id(), nanos)
+}
+
+#[cfg(target_os = "linux")]
+fn dbus_error(error: impl std::fmt::Display) -> io::Error {
+    io::Error::other(format!("Wayland GlobalShortcuts D-Bus error: {error}"))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1935,6 +2153,44 @@ mod tests {
             .iter()
             .any(|arg| arg.contains("Open Clippo history")));
         assert!(command.args.iter().any(|arg| arg.contains("Super+Shift+C")));
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn wayland_shortcut_daemon_matches_only_open_history_activation() {
+        let expected =
+            OwnedObjectPath::try_from("/org/freedesktop/portal/desktop/session/clippo_shortcuts")
+                .expect("expected session handle should be valid");
+        let other_session =
+            OwnedObjectPath::try_from("/org/freedesktop/portal/desktop/session/other")
+                .expect("other session handle should be valid");
+
+        assert!(WaylandShortcutDaemon::activation_matches(
+            &expected,
+            &expected,
+            "open-history"
+        ));
+        assert!(!WaylandShortcutDaemon::activation_matches(
+            &expected,
+            &other_session,
+            "open-history"
+        ));
+        assert!(!WaylandShortcutDaemon::activation_matches(
+            &expected,
+            &expected,
+            "other-shortcut"
+        ));
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn wayland_shortcut_daemon_tokens_are_request_path_elements() {
+        let token = unique_portal_token("clippo_bind_shortcuts");
+
+        assert!(token.starts_with("clippo_bind_shortcuts_"));
+        assert!(token
+            .chars()
+            .all(|character| character.is_ascii_alphanumeric() || character == '_'));
     }
 
     #[test]

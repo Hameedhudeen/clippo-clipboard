@@ -33,12 +33,12 @@ Latest local shared-core snapshot, measured 2026-06-02 on Linux 6.14 x86_64:
 
 | Benchmark | Result |
 | --- | ---: |
-| Add 1,000 history items | 2,412 us |
-| Search 1,000 history items | 261 us |
-| Build popup view model for 200 visible rows | 74 us |
-| Build searched popup view model for 200 visible rows | 177 us |
-| Save 1,000 items to JSON | 435 us |
-| Load 1,000 items from JSON | 272 us |
+| Add 1,000 history items | 5,447 us |
+| Search 1,000 history items | 389 us |
+| Build popup view model for 200 visible rows | 142 us |
+| Build searched popup view model for 200 visible rows | 385 us |
+| Save 1,000 items to JSON | 817 us |
+| Load 1,000 items from JSON | 486 us |
 
 ## Large Clipboard Items
 

@@ -6,7 +6,7 @@ Clippo targets equivalent clipboard workflows on macOS, Windows, and Linux. Exac
 
 | Clippo workflow | Platform target | Status |
 | --- | --- | --- |
-| Open clipboard history with a global shortcut | Platform-equivalent global shortcut | Implemented in macOS and Windows scaffolds; X11 helper exists; Wayland portal support pending |
+| Open clipboard history with a global shortcut | Platform-equivalent global shortcut | Implemented in macOS and Windows scaffolds; X11 helper exists; Wayland portal daemon exists and needs GNOME/KDE activation evidence |
 | Open clipboard history from a shell entry point | Menu bar, tray, or desktop shell equivalent | Implemented in macOS menu bar, Windows tray, and Linux desktop actions |
 | Type immediately to search history | Focused search on popup open | Implemented in shared core plus macOS/Windows scaffolds; final Linux GTK search pending |
 | Select item with Enter, click, or numbered shortcut | Keyboard and pointer selection | Shared selection model exists; macOS/Windows shell selection exists; Linux fallback click selection and shortcut command resolution exist |

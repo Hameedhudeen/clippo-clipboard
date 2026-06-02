@@ -15,7 +15,7 @@ This folder is the planned native Linux shell for Clippo.
 
 The current Rust shell scaffold includes session detection, explicit Wayland fallback guidance for restricted global shortcuts, clipboard monitoring, and paste automation, XDG autostart `.desktop` file registration helpers, `notify-send` desktop notification plumbing, clipboard backend plumbing for X11 and Wayland, X11 paste automation through `xdotool`, X11 shortcut configuration through xbindkeys, desktop launcher actions for common menu commands, persisted Linux shell state for pause/ignore-next actions, persisted Linux shell history with pinned shortcut labels, a zenity-backed GTK dialog fallback for history and preferences, monitor-aware popup placement helpers with fractional-scale alignment, and desktop-environment capability detection for GNOME, KDE Plasma, XFCE, and unknown shells.
 
-The native GTK4/libadwaita popup, status notifier integration, global shortcuts, and paste automation still require Linux desktop integration work and runtime validation on GNOME Wayland, GNOME X11, and KDE.
+The native GTK4/libadwaita popup, status notifier integration, and paste automation still require Linux desktop integration work and runtime validation on GNOME Wayland, GNOME X11, and KDE. Wayland GlobalShortcuts portal support now has a real daemon path, but it still needs activation evidence from desktops that expose the portal.
 
 ## Display Handling
 
@@ -49,7 +49,8 @@ Until the full GTK4/libadwaita shell is implemented, `clippo-linux --show-histor
 - `clippo-linux --show-history` is the command target used by desktop actions and global shortcuts.
 - `clippo-linux --copy-shortcut=<number>`, `--paste-shortcut=<number>`, `--paste-plain-shortcut=<number>`, `--toggle-pin-shortcut=<number>`, and `--delete-shortcut=<number>` resolve persisted pinned or visible row shortcuts for fallback keyboard workflows.
 - `clippo-linux --wayland-shortcuts-status` probes for the XDG Desktop Portal GlobalShortcuts interface and reports whether the native GTK/libadwaita shell can later use a portal session for Wayland shortcuts.
-- `clippo-linux --wayland-shortcuts-plan` prints the `CreateSession`, `BindShortcuts`, `ListShortcuts`, and signal-monitoring commands for target-host Wayland portal testing. The real GTK/libadwaita shell still needs to own the portal session and dispatch `open-history` activation before the task is complete.
+- `clippo-linux --wayland-shortcuts-plan` prints the `CreateSession`, `BindShortcuts`, `ListShortcuts`, and signal-monitoring commands for target-host Wayland portal testing.
+- `clippo-linux --wayland-shortcuts-daemon` owns a GlobalShortcuts portal session, binds the `open-history` shortcut, listens for `Activated`, and dispatches `clippo-linux --show-history`. Target-host GNOME/KDE activation evidence is still needed before the Wayland shortcut task can be closed.
 - `clippo-linux --pause-capture` toggles persisted clipboard capture pause state under the XDG state directory.
 - `clippo-linux --ignore-next-copy` marks the next clipboard capture as ignored and clears itself after it is consumed.
 - `clippo-linux --preferences` is the desktop action target for preferences while the GTK preferences window is still pending.
@@ -82,4 +83,4 @@ Run `scripts/package-linux-deb.sh` from the repository root to build a local Deb
 
 Run `scripts/package-linux-appimage.sh` to prepare an AppDir. It creates an AppImage when `appimagetool` is installed; otherwise it leaves the AppDir in `dist/linux/appimage/` for inspection.
 
-The initial Flatpak manifest is in `packaging/flatpak/app.clippo.Clippo.yml`. Run `scripts/package-linux-flatpak.sh` on a host with `flatpak-builder` to validate the manifest and build the Flatpak directory. It still needs portal testing before the Flatpak checklist item can be marked complete.
+The Flatpak manifest is in `packaging/flatpak/app.clippo.Clippo.yml` and targets the current GNOME runtime branch recorded there. Run `scripts/package-linux-flatpak.sh` on a host with `flatpak-builder` to validate the manifest and build the Flatpak directory. Export the result with `flatpak-builder --repo=dist/linux/flatpak-repo` when a locally installable Flatpak repo is needed for testing.

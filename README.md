@@ -121,14 +121,16 @@ See [docs/PRIVACY.md](docs/PRIVACY.md) and [docs/PERMISSIONS.md](docs/PERMISSION
 
 Clippo is intended to stay comfortable as an always-running utility. The v1 targets are under 50 MB idle memory where feasible, under 100 ms popup open latency, and near-zero idle CPU when the clipboard has not changed.
 
-Current shared-core benchmark snapshot from 2026-06-01 on Linux 6.14 x86_64:
+Current shared-core benchmark snapshot from 2026-06-02 on Linux 6.14 x86_64:
 
 | Benchmark | Result |
 | --- | ---: |
-| Add 1,000 history items | 2,153 us |
-| Search 1,000 history items | 174 us |
-| Save 1,000 items to JSON | 331 us |
-| Load 1,000 items from JSON | 205 us |
+| Add 1,000 history items | 5,447 us |
+| Search 1,000 history items | 389 us |
+| Build popup view model for 200 visible rows | 142 us |
+| Build searched popup view model for 200 visible rows | 385 us |
+| Save 1,000 items to JSON | 817 us |
+| Load 1,000 items from JSON | 486 us |
 
 Native shell memory, popup latency, and CPU wakeup measurements still need to be recorded before stable release. See [docs/PERFORMANCE_TARGETS.md](docs/PERFORMANCE_TARGETS.md).
 

@@ -2,6 +2,8 @@
 
 Use this folder for small, commit-friendly validation logs. Large screenshots, videos, package artifacts, and environment-specific evidence can stay in GitHub issues created from the `Validation evidence` issue template.
 
+Generated target-host logs are ignored by default. Rename reviewed, publication-safe logs to `evidence-*.md` or `release-*.md` when they should be committed.
+
 ## Rules
 
 - Do not include real clipboard contents, private file paths, credentials, customer data, or sensitive URLs.
@@ -41,9 +43,9 @@ The check ignores this README and `TEMPLATE.md`. For committed evidence logs, it
 
 ## Suggested File Names
 
-- `macos-universal-clipboard-YYYY-MM-DD.md`
-- `windows-msix-install-YYYY-MM-DD.md`
-- `linux-wayland-shortcuts-YYYY-MM-DD.md`
-- `ui-parity-review-YYYY-MM-DD.md`
-- `accessibility-review-YYYY-MM-DD.md`
+- `evidence-macos-universal-clipboard-YYYY-MM-DD.md`
+- `evidence-windows-msix-install-YYYY-MM-DD.md`
+- `evidence-linux-wayland-shortcuts-YYYY-MM-DD.md`
+- `evidence-ui-parity-review-YYYY-MM-DD.md`
+- `evidence-accessibility-review-YYYY-MM-DD.md`
 - `release-vX.Y.Z-YYYY-MM-DD.md`

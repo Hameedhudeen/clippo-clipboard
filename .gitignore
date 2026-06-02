@@ -32,10 +32,13 @@ obj/
 .codex/
 
 # Validation logs generated on target hosts.
-# Keep the public guidance and template committed.
+# Keep arbitrary target-host logs ignored, but allow curated evidence files that
+# are intentionally reviewed and safe to publish.
 /docs/validation/*.md
 !/docs/validation/README.md
 !/docs/validation/TEMPLATE.md
+!/docs/validation/evidence-*.md
+!/docs/validation/release-*.md
 
 # Logs and diagnostics
 *.log

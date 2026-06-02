@@ -31,7 +31,9 @@ For Wayland sessions, `clippo-linux --wayland-shortcuts-status` probes the sessi
 - `ListShortcuts` to inspect the session.
 - A `gdbus monitor` command for `Activated` signals.
 
-The GTK/libadwaita shell still needs to own the long-running portal session, map `Activated` for `open-history` to `clippo-linux --show-history`, and record GNOME/KDE evidence before the Wayland shortcut task can be marked complete.
+`clippo-linux --wayland-shortcuts-daemon` is the runtime portal path for the Linux shell. It creates a long-running GlobalShortcuts session, requests the `open-history` shortcut with preferred trigger `Super+Shift+C`, listens for `Activated`, and dispatches `clippo-linux --show-history`.
+
+GNOME/KDE evidence is still required before the Wayland shortcut validation task can be marked complete, because compositor support for the portal differs by desktop and distribution.
 
 ## Clipboard Backend
 

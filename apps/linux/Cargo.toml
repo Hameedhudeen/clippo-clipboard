@@ -1,6 +1,6 @@
 [package]
 name = "clippo-linux"
-version = "0.0.0"
+version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
@@ -8,6 +8,9 @@ rust-version.workspace = true
 [dependencies]
 clippo-core = { path = "../../crates/clippo-core" }
 clippo-platform = { path = "../../crates/clippo-platform", features = ["linux"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus = "4.4.0"
 
 [features]
 default = []
