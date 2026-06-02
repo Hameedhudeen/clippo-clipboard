@@ -8,7 +8,7 @@ Clippo should run with a system tray icon. Opening the app a second time should 
 
 ## Background And Startup
 
-Closing or minimizing the history popup hides it while the tray process keeps clipboard capture active. Use Exit from the tray menu to stop Clippo. Preferences include Launch at login, which writes a current-user startup entry.
+Closing or minimizing the history popup hides it while the tray process keeps clipboard capture active. Use Exit from the tray menu to stop Clippo. On first launch, Clippo asks whether it should start automatically when you sign in. Preferences include the same Launch at login control, which writes a current-user startup entry.
 
 ## Open Clipboard History
 
@@ -39,4 +39,4 @@ See `docs/TROUBLESHOOTING.md` and `docs/LIMITATIONS.md`.
 
 ## Validation Status
 
-The source includes the tray entry, compact popup, search focus, shortcut column, tooltip previews, footer actions, keyboard shortcuts, Windows Clipboard History coexistence handling, preferences, local history persistence, launch-at-login, elevated-app paste fallback, hide-instead-of-close popup behavior, and clipboard monitoring. Target-host screenshots, DPI scaling checks, Windows screen reader checks, Windows Clipboard History coexistence testing, and installer validation are still required before this guide can be considered release evidence.
+The source includes the tray entry, compact popup, search focus, shortcut column, tooltip previews, footer actions, keyboard shortcuts, Windows Clipboard History coexistence handling, preferences, local history persistence, first-run Launch at login prompt, launch-at-login control, elevated-app paste fallback, hide-instead-of-close popup behavior, and clipboard monitoring. Target-host screenshots, DPI scaling checks, Windows screen reader checks, Windows Clipboard History coexistence testing, and installer validation are still required before this guide can be considered release evidence.

@@ -171,6 +171,9 @@ final class ClippoMacModel: ObservableObject {
         globalHotKey = GlobalHotKey(keyCode: UInt32(kVK_ANSI_C), modifiers: UInt32(cmdKey | shiftKey)) { [weak self] in
             self?.showHistoryWindow()
         }
+        DispatchQueue.main.async { [weak self] in
+            self?.maybePromptLaunchAtLoginOnFirstRun()
+        }
     }
 
     deinit {
@@ -443,6 +446,30 @@ final class ClippoMacModel: ObservableObject {
         } catch {
             launchAtLogin = SMAppService.mainApp.status == .enabled
             notify(title: "Launch at Login", body: "Could not update launch at login setting.")
+        }
+    }
+
+    func maybePromptLaunchAtLoginOnFirstRun() {
+        let promptKey = "app.clippo.firstRunLaunchAtLoginPrompted"
+        let defaults = UserDefaults.standard
+        if launchAtLogin {
+            defaults.set(true, forKey: promptKey)
+            return
+        }
+        guard !defaults.bool(forKey: promptKey) else {
+            return
+        }
+
+        let alert = NSAlert()
+        alert.messageText = "Start Clippo automatically?"
+        alert.informativeText = "Clippo works best as a menu bar utility that starts when you sign in and keeps clipboard history available in the background."
+        alert.addButton(withTitle: "Enable Launch at Login")
+        alert.addButton(withTitle: "Not Now")
+        NSApp.activate(ignoringOtherApps: true)
+        let response = alert.runModal()
+        defaults.set(true, forKey: promptKey)
+        if response == .alertFirstButtonReturn {
+            setLaunchAtLogin(true)
         }
     }
 

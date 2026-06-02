@@ -46,6 +46,7 @@ internal sealed class ClippoApplicationContext : ApplicationContext
             ContextMenuStrip = BuildTrayMenu()
         };
         trayIcon.DoubleClick += (_, _) => ShowHistory();
+        PromptForLaunchAtLoginIfNeeded();
     }
 
     public IReadOnlyList<HistoryItem> History => history;
@@ -210,6 +211,7 @@ internal sealed class ClippoApplicationContext : ApplicationContext
     public void SetLaunchAtLogin(bool enabled)
     {
         StartupRegistration.SetEnabled(enabled);
+        StartupRegistration.MarkFirstRunPrompted();
         RefreshUi();
     }
 
@@ -280,6 +282,27 @@ internal sealed class ClippoApplicationContext : ApplicationContext
     private void SaveHistory()
     {
         historyStore.Save(history);
+    }
+
+    private void PromptForLaunchAtLoginIfNeeded()
+    {
+        if (!StartupRegistration.ShouldPromptOnFirstRun())
+        {
+            return;
+        }
+
+        var result = MessageBox.Show(
+            "Start Clippo automatically when you sign in?\n\nClippo works best as a tray utility that keeps clipboard history available in the background.",
+            "Start Clippo automatically?",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question
+        );
+
+        StartupRegistration.MarkFirstRunPrompted();
+        if (result == DialogResult.Yes)
+        {
+            SetLaunchAtLogin(true);
+        }
     }
 
     protected override void ExitThreadCore()
@@ -787,7 +810,9 @@ internal static class PopupPlacement
 internal static class StartupRegistration
 {
     private const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
+    private const string AppKeyPath = @"Software\Clippo";
     private const string ValueName = "Clippo";
+    private const string FirstRunPromptedValueName = "FirstRunAutostartPrompted";
 
     public static bool IsEnabled()
     {
@@ -811,6 +836,24 @@ internal static class StartupRegistration
         {
             key.DeleteValue(ValueName, throwOnMissingValue: false);
         }
+    }
+
+    public static bool ShouldPromptOnFirstRun()
+    {
+        if (IsEnabled())
+        {
+            MarkFirstRunPrompted();
+            return false;
+        }
+
+        using var key = Registry.CurrentUser.OpenSubKey(AppKeyPath, writable: false);
+        return key?.GetValue(FirstRunPromptedValueName) is not int value || value != 1;
+    }
+
+    public static void MarkFirstRunPrompted()
+    {
+        using var key = Registry.CurrentUser.CreateSubKey(AppKeyPath, writable: true);
+        key?.SetValue(FirstRunPromptedValueName, 1, RegistryValueKind.DWord);
     }
 }
 

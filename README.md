@@ -24,6 +24,7 @@ Clippo is designed as a small desktop utility that stays out of the way until yo
 - Pause clipboard capture when needed.
 - Ignore only the next copy.
 - Configure ignored clipboard types and privacy rules.
+- Choose on first launch whether Clippo should start automatically after sign-in.
 - Store data locally with no telemetry by default.
 - Use native-feeling macOS, Windows, and Linux interfaces.
 - Stay lightweight as an always-running menu bar, tray, or desktop-shell utility until explicitly quit.

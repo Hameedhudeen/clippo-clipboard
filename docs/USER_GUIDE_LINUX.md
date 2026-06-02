@@ -8,7 +8,7 @@ Current packages start a resident background monitor from the desktop launcher o
 
 ## Background And Startup
 
-The background monitor reads the supported Linux clipboard backend, writes history to the XDG state directory, and keeps running until stopped with `clippo-linux --quit` or the Quit Clippo desktop action. `clippo-linux --enable-autostart` registers Clippo under XDG autostart with background mode enabled.
+The background monitor reads the supported Linux clipboard backend, writes history to the XDG state directory, and keeps running until stopped with `clippo-linux --quit` or the Quit Clippo desktop action. On first launch, the fallback shell asks whether Clippo should start automatically after sign-in when Zenity is available; if the dialog backend is unavailable, it points users to `clippo-linux --enable-autostart`. The startup entry uses XDG Autostart with background mode enabled.
 
 ## Open Clipboard History
 
@@ -39,4 +39,4 @@ See `docs/WAYLAND.md`, `docs/TROUBLESHOOTING.md`, and `docs/LIMITATIONS.md`.
 
 ## Validation Status
 
-The Linux fallback keeps the workflow testable and now has a resident background monitor, but it is not the final native UI. The GTK4/libadwaita popup, status notifier integration, GNOME/KDE visual validation, screen reader checks, fractional scaling checks, and Wayland shortcut activation evidence are still required before Linux UI/UX parity can be claimed.
+The Linux fallback keeps the workflow testable and now has a resident background monitor plus first-run autostart prompt, but it is not the final native UI. The GTK4/libadwaita popup, status notifier integration, GNOME/KDE visual validation, screen reader checks, fractional scaling checks, and Wayland shortcut activation evidence are still required before Linux UI/UX parity can be claimed.

@@ -37,7 +37,7 @@ Lifecycle transitions expose side effects that native shells must honor:
 - Save history and settings before menu/tray quit, normal shutdown, and update restart.
 - Relaunch after update restart only when the update flow requests it.
 
-Autostart should be opt-in by default on every OS and should start the resident capture process, not only the history popup.
+Autostart should be opt-in by default on every OS and should start the resident capture process, not only the history popup. Native shells should ask once on first launch and keep the control available in preferences or platform-equivalent commands.
 
 ## First-Run Onboarding
 

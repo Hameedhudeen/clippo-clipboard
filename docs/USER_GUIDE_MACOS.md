@@ -8,7 +8,7 @@ Clippo should run as a menu bar app. Opening the app a second time should focus 
 
 ## Background And Startup
 
-Closing the history popup should not stop clipboard capture; use Quit Clippo from the menu bar item to exit. Preferences expose Launch at Login through macOS `SMAppService` so Clippo can start after sign-in.
+Closing the history popup should not stop clipboard capture; use Quit Clippo from the menu bar item to exit. On first launch, Clippo asks whether it should start automatically when you sign in. Preferences expose the same Launch at Login control through macOS `SMAppService`.
 
 ## Open Clipboard History
 
@@ -39,4 +39,4 @@ See `docs/TROUBLESHOOTING.md` and `docs/ACCESSIBILITY.md`.
 
 ## Validation Status
 
-The source includes the menu bar entry, compact popup, search focus, pinned/history sections, row shortcut hints, native help text for full previews, actions, preferences, local history persistence, launch-at-login, sleep/wake handling, and clipboard monitoring. Target-host screenshots, scaling checks, VoiceOver checks, Universal Clipboard behavior, and signed app-bundle validation are still required before this guide can be considered release evidence.
+The source includes the menu bar entry, compact popup, search focus, pinned/history sections, row shortcut hints, native help text for full previews, actions, preferences, local history persistence, first-run Launch at Login prompt, launch-at-login control, sleep/wake handling, and clipboard monitoring. Target-host screenshots, scaling checks, VoiceOver checks, Universal Clipboard behavior, and signed app-bundle validation are still required before this guide can be considered release evidence.

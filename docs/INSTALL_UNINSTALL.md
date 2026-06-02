@@ -9,7 +9,7 @@ Install:
 - Download the signed and notarized app bundle from GitHub Releases.
 - Move Clippo to Applications.
 - Grant Accessibility permission if automatic paste is enabled.
-- Enable Launch at Login in preferences if Clippo should start automatically.
+- Choose whether to enable Launch at Login when Clippo asks on first launch, or change it later in preferences.
 
 Uninstall:
 
@@ -23,7 +23,7 @@ Install:
 
 - Download the MSIX or MSI from GitHub Releases.
 - Run the installer.
-- Configure startup at login if desired.
+- Choose whether to enable Launch at login when Clippo asks on first launch, or change it later in preferences.
 
 Uninstall:
 
@@ -36,7 +36,7 @@ Uninstall:
 Install:
 
 - Use AppImage for broad testing, Flatpak where portal integration is viable, or `.deb` for Debian/Ubuntu systems.
-- Run `clippo-linux --enable-autostart` if Clippo should start automatically in background mode after sign-in.
+- Choose whether to enable autostart when Clippo asks on first launch, or run `clippo-linux --enable-autostart` if the fallback dialog backend is unavailable.
 
 Uninstall:
 

@@ -22,7 +22,7 @@ fn main() {
     let autostart = XdgAutostart::from_environment();
     let state_store = LinuxShellStateStore::from_environment();
     if should_start_background_by_default(&args) || args.iter().any(|arg| arg == "--background") {
-        run_background_monitor(&state_store);
+        run_background_monitor(&autostart, &state_store);
         return;
     }
     if args.iter().any(|arg| arg == "--status") {
@@ -320,7 +320,8 @@ fn show_preferences(state_store: &LinuxShellStateStore) {
                 "not running"
             };
             let body = format!(
-                "Background monitor: {background_state}\nCapture paused: {}\nIgnore next copy: {}\nState file: {}",
+                "Background monitor: {background_state}\nAutostart prompt shown: {}\nCapture paused: {}\nIgnore next copy: {}\nState file: {}",
+                state.autostart_prompted,
                 state.capture_paused,
                 state.ignore_next_copy,
                 state_store.state_path().display()
@@ -333,7 +334,7 @@ fn show_preferences(state_store: &LinuxShellStateStore) {
     }
 }
 
-fn run_background_monitor(state_store: &LinuxShellStateStore) {
+fn run_background_monitor(autostart: &XdgAutostart, state_store: &LinuxShellStateStore) {
     let instance = SingleInstance::new(state_store.background_lock_path());
     let _guard = match instance.launch() {
         Ok(LaunchOutcome::PrimaryInstance(guard)) => guard,
@@ -355,8 +356,40 @@ fn run_background_monitor(state_store: &LinuxShellStateStore) {
         "Running in Background",
         "Clipboard history capture is active. Use Quit Clippo to stop it.",
     );
+    maybe_prompt_autostart_on_first_run(autostart, state_store);
 
     monitor_clipboard_until_exit(state_store);
+}
+
+fn maybe_prompt_autostart_on_first_run(
+    autostart: &XdgAutostart,
+    state_store: &LinuxShellStateStore,
+) {
+    match state_store.load() {
+        Ok(state) if state.autostart_prompted => return,
+        Ok(_) => {}
+        Err(error) => {
+            eprintln!("Could not read Linux first-run state: {error}");
+            return;
+        }
+    }
+
+    if autostart.is_enabled() {
+        if let Err(error) = state_store.mark_autostart_prompted() {
+            eprintln!("Could not save Linux first-run state: {error}");
+        }
+        return;
+    }
+
+    match ZenityDialog::confirm_autostart() {
+        Ok(Some(true)) => enable_autostart(autostart),
+        Ok(Some(false) | None) => {}
+        Err(error) => eprintln!("Could not show autostart prompt: {error}"),
+    }
+
+    if let Err(error) = state_store.mark_autostart_prompted() {
+        eprintln!("Could not save Linux first-run state: {error}");
+    }
 }
 
 fn monitor_clipboard_until_exit(state_store: &LinuxShellStateStore) {
@@ -1563,6 +1596,7 @@ impl XdgAutostart {
 struct LinuxShellState {
     capture_paused: bool,
     ignore_next_copy: bool,
+    autostart_prompted: bool,
 }
 
 struct LinuxShellStateStore {
@@ -1604,6 +1638,12 @@ impl LinuxShellStateStore {
     fn set_ignore_next_copy(&self) -> io::Result<()> {
         let mut state = self.load()?;
         state.ignore_next_copy = true;
+        self.save(state)
+    }
+
+    fn mark_autostart_prompted(&self) -> io::Result<()> {
+        let mut state = self.load()?;
+        state.autostart_prompted = true;
         self.save(state)
     }
 
@@ -1719,8 +1759,8 @@ impl LinuxShellStateStore {
 
 fn serialize_state_file(state: LinuxShellState) -> String {
     format!(
-        "capture_paused={}\nignore_next_copy={}\n",
-        state.capture_paused, state.ignore_next_copy
+        "capture_paused={}\nignore_next_copy={}\nautostart_prompted={}\n",
+        state.capture_paused, state.ignore_next_copy, state.autostart_prompted
     )
 }
 
@@ -1743,6 +1783,7 @@ fn parse_state_file(contents: &str) -> io::Result<LinuxShellState> {
         match key {
             "capture_paused" => state.capture_paused = parsed,
             "ignore_next_copy" => state.ignore_next_copy = parsed,
+            "autostart_prompted" => state.autostart_prompted = parsed,
             _ => {}
         }
     }
@@ -1958,6 +1999,21 @@ impl ZenityDialog {
             Err(error) => Err(error),
         }
     }
+
+    fn confirm_autostart() -> io::Result<Option<bool>> {
+        let command = zenity_autostart_prompt_command();
+        match Command::new(command.program).args(command.args).status() {
+            Ok(status) => Ok(Some(status.success())),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                let _ = notify(
+                    "Startup Option",
+                    "Open Clippo preferences or run `clippo-linux --enable-autostart` to start Clippo automatically after sign-in.",
+                );
+                Ok(None)
+            }
+            Err(error) => Err(error),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2039,6 +2095,25 @@ fn zenity_search_command() -> DialogCommand {
             "Search clipboard history".to_string(),
             "--entry-text".to_string(),
             String::new(),
+            "--width".to_string(),
+            "420".to_string(),
+        ],
+    }
+}
+
+fn zenity_autostart_prompt_command() -> DialogCommand {
+    DialogCommand {
+        program: "zenity",
+        args: vec![
+            "--question".to_string(),
+            "--title".to_string(),
+            "Start Clippo automatically?".to_string(),
+            "--text".to_string(),
+            "Clippo works best as a background clipboard utility. Start Clippo automatically when you sign in?".to_string(),
+            "--ok-label".to_string(),
+            "Enable Autostart".to_string(),
+            "--cancel-label".to_string(),
+            "Not Now".to_string(),
             "--width".to_string(),
             "420".to_string(),
         ],
@@ -2689,9 +2764,11 @@ mod tests {
         let state = LinuxShellState {
             capture_paused: true,
             ignore_next_copy: true,
+            autostart_prompted: true,
         };
         let serialized = serialize_state_file(state);
         assert!(serialized.contains("capture_paused=true"));
+        assert!(serialized.contains("autostart_prompted=true"));
         assert_eq!(parse_state_file(&serialized).unwrap(), state);
     }
 
@@ -2719,6 +2796,12 @@ mod tests {
         let state = store.load().expect("state should load");
         assert!(state.capture_paused);
         assert!(state.ignore_next_copy);
+
+        store
+            .mark_autostart_prompted()
+            .expect("autostart prompt state should be saved");
+        let state = store.load().expect("state should load");
+        assert!(state.autostart_prompted);
 
         let resumed = store
             .toggle_capture_paused()
@@ -3007,6 +3090,18 @@ mod tests {
             .args
             .contains(&"Search clipboard history".to_string()));
         assert!(command.args.contains(&"--entry-text".to_string()));
+    }
+
+    #[test]
+    fn zenity_autostart_prompt_asks_for_startup_opt_in() {
+        let command = zenity_autostart_prompt_command();
+        assert_eq!(command.program, "zenity");
+        assert!(command.args.contains(&"--question".to_string()));
+        assert!(command
+            .args
+            .contains(&"Start Clippo automatically?".to_string()));
+        assert!(command.args.contains(&"Enable Autostart".to_string()));
+        assert!(command.args.contains(&"Not Now".to_string()));
     }
 
     #[test]
