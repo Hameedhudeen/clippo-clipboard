@@ -2,74 +2,71 @@
 
 ![Clippo icon](assets/icon.svg)
 
-Clippo is a lightweight, native-feeling clipboard history manager for macOS, Windows, and Linux.
+Clippo is an open-source, cross-platform clipboard history manager for macOS, Windows, and Linux. It is built for people who want a fast keyboard-first clipboard workflow, local-only storage, native desktop behavior, and low background resource usage.
 
-> Status: pre-alpha. Clippo is not ready for daily use yet.
+> Status: pre-alpha. Clippo is under active development and is not ready for daily use yet.
 
-## Why Clippo
+## What Clippo Aims To Do
 
-Clippo is an open-source desktop utility for people who want fast clipboard history, local-first privacy, and native platform behavior without a heavy background app. The project is being built in public with a shared Rust core and native shells for each operating system.
+Clippo is designed as a small desktop utility that stays out of the way until you need your clipboard history.
 
-## Feature Goals
-
-- Searchable clipboard history.
-- Global shortcut to open clipboard history.
-- Keyboard-first selection and paste workflow.
-- Pinning for frequently used clips.
+- Keep a searchable history of recent clipboard items.
+- Open the history popup with a global shortcut.
+- Search immediately when the popup opens.
+- Select, copy, or paste items from the keyboard.
 - Paste with or without formatting where the operating system allows it.
-- Delete individual items, clear regular history, or clear all history.
-- Pause clipboard capture.
+- Pin frequently used clips above regular history.
+- Delete one item, clear regular history, or clear all history.
+- Pause clipboard capture when needed.
 - Ignore only the next copy.
-- Configurable ignored clipboard types and privacy rules.
-- Local-only storage with no telemetry by default.
-- Native-feeling UI for each supported operating system.
-- Low idle memory usage as a first-class engineering goal.
+- Configure ignored clipboard types and privacy rules.
+- Store data locally with no telemetry by default.
+- Use native-feeling macOS, Windows, and Linux interfaces.
+- Stay lightweight as an always-running background utility.
 
-## Open Source Status
+## Project Status
 
-Clippo is maintained as a community open-source project. Contributions are welcome in the form of platform testing, documentation fixes, issue triage, accessibility feedback, packaging help, and focused pull requests.
+Clippo is currently a pre-alpha open-source project. The shared Rust core and native shell scaffolds exist, but the app still needs target-host validation, production packaging, screenshots, and release artifacts.
 
-The project is still pre-alpha, so contributors should expect incomplete platform shells and validation tasks that require real macOS, Windows, and Linux hosts.
-
-## Current Implementation
-
-- Shared Rust core for clipboard item modeling, history ordering, search, selection, command routing, settings, privacy rules, localization keys, lifecycle state, and diagnostics.
-- Shared persistence crate for JSON storage, migrations, retention, import/export, and crash-safe writes.
-- Shared platform abstraction crate for clipboard, paste, shortcuts, tray/menu, notifications, autostart, permissions, polling, and single-instance behavior.
-- macOS SwiftUI/AppKit shell scaffold with menu bar UI, search-focused history window, pasteboard polling, copy/paste actions, pause/ignore actions, preferences, launch-at-login, global hotkey registration, notifications, and display-aware placement.
-- Windows WinForms shell scaffold with tray menu, global hotkey, clipboard listener, searchable history popup, copy/paste actions, pause/ignore actions, preferences, startup registration, notifications, UAC-aware paste fallback, and Clipboard History coexistence safeguards.
-- Linux Rust shell scaffold with X11/Wayland clipboard plumbing, X11 paste automation, Wayland manual-paste fallback, X11 shortcut helper, XDG autostart, desktop launcher actions, `.deb` packaging, zenity fallback dialogs, persisted state/history, and desktop-environment detection.
+| Area | Status |
+| --- | --- |
+| Shared Rust core | Implemented for history, search, settings, privacy, persistence, commands, lifecycle, localization keys, and diagnostics. |
+| macOS shell | SwiftUI/AppKit scaffold exists; runtime validation still needs macOS and Xcode. |
+| Windows shell | WinForms scaffold exists; runtime validation still needs Windows and the .NET desktop workload. |
+| Linux shell | Rust fallback shell exists for X11/Wayland clipboard paths, zenity dialogs, desktop actions, autostart, and `.deb` packaging. |
+| Releases | No public release artifacts yet. |
 
 ## Screenshots
 
-Screenshots and short workflow GIFs will be added after the first native shell is usable.
-
-## Platform Plan
-
-| Platform | Target | Notes |
-| --- | --- | --- |
-| macOS | Native shell scaffold | Uses SwiftUI/AppKit source; runtime validation still needs macOS and Xcode. |
-| Windows | Native shell scaffold | Uses WinForms source; runtime validation still needs Windows and the .NET desktop workload. |
-| Linux X11 | Shell scaffold plus fallback dialogs | Supports command-backed clipboard, paste, shortcut, autostart, desktop actions, and `.deb` packaging; full GTK/libadwaita UI is still pending. |
-| Linux Wayland | Shell scaffold plus documented fallbacks | Clipboard support uses `wl-clipboard` where available; shortcuts and paste automation depend on compositor/portal behavior. |
+Screenshots and short workflow GIFs will be added after the first native shell is usable enough to represent the project honestly.
 
 ## Install
 
-Clippo does not have public release artifacts yet. Local development packaging exists for Linux `.deb`, while macOS signing, Windows installer packaging, AppImage, and Flatpak still require native tooling or external validation before release.
+Clippo does not have public downloads yet. For now, contributors should build from source.
+
+```sh
+git clone https://github.com/Hameedhudeen/clippo-clipboard.git
+cd clippo-clipboard
+scripts/check.sh
+```
+
+Linux `.deb` packaging has a local scaffold:
 
 ```sh
 scripts/package-linux-deb.sh
 ```
 
+macOS signing, Windows installer packaging, AppImage, and Flatpak still require target-platform validation before release.
+
 ## Keyboard-First Workflow
 
-Clippo will be designed so the main workflow can happen without leaving the keyboard:
+The core workflow should work without leaving the keyboard:
 
 - Open history with a global shortcut.
 - Type to search immediately.
-- Select a result with keyboard navigation or a numbered shortcut.
+- Select a result with arrow keys, Enter, pointer selection, or numbered shortcuts.
 - Paste normally or paste without formatting where supported.
-- Pin, delete, clear, pause capture, or ignore the next copy with platform-appropriate shortcuts.
+- Pin, delete, clear, pause capture, ignore the next copy, or open preferences from native actions.
 
 Planned default shortcuts:
 
@@ -86,55 +83,43 @@ Planned default shortcuts:
 
 `Meta` renders as Command on macOS, Windows key on Windows where appropriate, and Super on Linux where appropriate.
 
-## Architecture Direction
+## Platform Support Plan
 
-Clippo is built around a Rust shared core with native platform shells:
+| Platform | Target | Current notes |
+| --- | --- | --- |
+| macOS | Native menu bar app | SwiftUI/AppKit source exists; signed bundle validation is pending. |
+| Windows | Native tray app | WinForms source exists; installer and runtime validation are pending. |
+| Linux X11 | Native shell plus fallbacks | Clipboard, paste, shortcut helper, desktop actions, and fallback dialogs exist. |
+| Linux Wayland | Native shell plus documented fallbacks | Clipboard and shortcuts depend on compositor and portal support. |
 
-- Rust shared core for history, search, settings, persistence, privacy rules, and platform-neutral behavior.
-- Native macOS shell using SwiftUI/AppKit.
-- Native Windows shell using WinUI 3 or an equivalent native Windows UI.
-- Native Linux shell using GTK4/libadwaita unless platform research rejects it.
+## Architecture
 
-This direction is intended to keep memory usage low while still giving each OS a familiar interface.
+Clippo uses a shared Rust core with native platform shells:
 
-## Roadmap
+- `clippo-core`: history, search, selection, command routing, settings, privacy, lifecycle, and diagnostics.
+- `clippo-persistence`: local JSON storage, migrations, retention, import/export, and crash-safe writes.
+- `clippo-platform`: shared platform traits for clipboard, paste, shortcuts, tray/menu, notifications, autostart, permissions, polling, and single-instance behavior.
+- `apps/macos`: native macOS shell scaffold.
+- `apps/windows`: native Windows shell scaffold.
+- `apps/linux`: Linux shell scaffold and fallback integration.
 
-Public roadmap and milestones live in [ROADMAP.md](ROADMAP.md).
-The workflow parity matrix lives in [docs/PARITY.md](docs/PARITY.md).
-Project direction, UI/UX constraints, and v1 non-goals live in [docs/PROJECT_DIRECTION.md](docs/PROJECT_DIRECTION.md).
-Packaging decisions live in [docs/PACKAGING.md](docs/PACKAGING.md).
-Keyboard shortcuts live in [docs/KEYBOARD_SHORTCUTS.md](docs/KEYBOARD_SHORTCUTS.md).
-Permission explanations live in [docs/PERMISSIONS.md](docs/PERMISSIONS.md).
-Paste behavior lives in [docs/PASTE_BEHAVIOR.md](docs/PASTE_BEHAVIOR.md).
-Community feedback policy lives in [docs/COMMUNITY_FEEDBACK.md](docs/COMMUNITY_FEEDBACK.md).
-GitHub milestone planning lives in [docs/MILESTONES.md](docs/MILESTONES.md).
-Roadmap issue drafts live in [docs/ROADMAP_ISSUES.md](docs/ROADMAP_ISSUES.md).
-External validation evidence for remaining OS and release gates lives in [docs/EXTERNAL_VALIDATION.md](docs/EXTERNAL_VALIDATION.md).
-Commit-friendly validation log templates live in [docs/validation/](docs/validation/).
+This structure keeps shared behavior testable while allowing each operating system to feel native.
 
-Current major milestones:
+## Privacy
 
-- v0.1: Buildable local app on at least one OS.
-- v0.2: Tested shared core for history, search, persistence, and settings.
-- v0.3: One native platform shell usable end to end.
-- v0.4: macOS, Windows, and Linux can open, search, copy, and paste history items.
-- v0.5: Core clipboard workflow parity across supported OSes.
-- v1.0: Documented, packaged, tested release with known limitations clearly stated.
+Clippo is designed around local-first privacy:
 
-## Privacy Goals
-
-- Clipboard history stays local by default.
-- No telemetry by default.
+- Clipboard history stays on the user's machine by default.
+- No telemetry is planned by default.
 - Logs and diagnostics should redact clipboard contents.
 - Users should be able to clear stored clipboard data quickly.
 - Platform permission requirements must be documented clearly.
 
-See [docs/PRIVACY.md](docs/PRIVACY.md) for the current privacy model.
-See [docs/PERMISSIONS.md](docs/PERMISSIONS.md) for why clipboard access and paste automation permissions may be requested.
+See [docs/PRIVACY.md](docs/PRIVACY.md) and [docs/PERMISSIONS.md](docs/PERMISSIONS.md).
 
 ## Performance Goals
 
-Clippo is intended to stay lightweight as an always-running utility. The current v1 targets are under 50 MB idle memory where feasible, under 100 ms popup open latency, and near-zero idle CPU when the clipboard has not changed.
+Clippo is intended to stay comfortable as an always-running utility. The v1 targets are under 50 MB idle memory where feasible, under 100 ms popup open latency, and near-zero idle CPU when the clipboard has not changed.
 
 Current shared-core benchmark snapshot from 2026-06-01 on Linux 6.14 x86_64:
 
@@ -147,28 +132,56 @@ Current shared-core benchmark snapshot from 2026-06-01 on Linux 6.14 x86_64:
 
 Native shell memory, popup latency, and CPU wakeup measurements still need to be recorded before stable release. See [docs/PERFORMANCE_TARGETS.md](docs/PERFORMANCE_TARGETS.md).
 
+## Roadmap
+
+Clippo's public roadmap is tracked in this repository:
+
+- [ROADMAP.md](ROADMAP.md): current milestone plan.
+- [docs/PARITY.md](docs/PARITY.md): workflow parity matrix.
+- [docs/PROJECT_DIRECTION.md](docs/PROJECT_DIRECTION.md): project goals, non-goals, and platform targets.
+- [docs/UI_UX.md](docs/UI_UX.md): UI/UX reference and native interface rules.
+- [docs/EXTERNAL_VALIDATION.md](docs/EXTERNAL_VALIDATION.md): validation gates that require target operating systems.
+- [docs/MILESTONES.md](docs/MILESTONES.md): GitHub milestone structure.
+
+Current major milestones:
+
+- v0.1: Buildable local app on at least one OS.
+- v0.2: Tested shared core for history, search, persistence, and settings.
+- v0.3: One native platform shell usable end to end.
+- v0.4: macOS, Windows, and Linux can open, search, copy, and paste history items.
+- v0.5: Core clipboard workflow parity across supported OSes.
+- v1.0: Documented, packaged, tested release with known limitations clearly stated.
+
+## Contributing
+
+Contributions are welcome, especially:
+
+- Target-platform testing on macOS, Windows, Linux X11, and Linux Wayland.
+- Accessibility and screen-reader feedback.
+- Packaging help for macOS, Windows, AppImage, Flatpak, and `.deb`.
+- Documentation fixes and troubleshooting notes.
+- Focused pull requests for roadmap items.
+
+Before opening a pull request, read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/CONTRIBUTOR_SETUP.md](docs/CONTRIBUTOR_SETUP.md).
+
 ## FAQ
 
 ### Is Clippo ready to use?
 
-Not yet. The project is in pre-alpha. The shared core and shell scaffolds exist, but full native UI parity, packaging, and runtime validation are still in progress.
-
-### Will Linux Wayland have full feature parity?
-
-Clippo will target equivalent workflows on Wayland, but global shortcuts, clipboard access, and paste automation depend on desktop portals and compositor support. Any limitations will be documented instead of hidden.
-
-### What if Clippo's global shortcut conflicts with another app?
-
-Shortcut conflict detection and troubleshooting will be part of the preferences work. The final defaults have not been chosen yet.
-
-### Why does paste automation need permissions?
-
-Automatic paste requires Clippo to interact with the active app after you choose a history item. Each operating system handles that permission differently, so Clippo will document the requirement per platform.
+Not yet. Clippo is pre-alpha. It has shared core code and platform scaffolds, but full native UI validation, packaging, and release artifacts are still in progress.
 
 ### Will Clippo collect telemetry?
 
 No telemetry is planned by default.
 
-## Contributing
+### Will Linux Wayland have full feature parity?
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/CONTRIBUTOR_SETUP.md](docs/CONTRIBUTOR_SETUP.md) before opening a pull request. Good first issues and help-wanted labels are defined in `.github/labels.yml`.
+Clippo targets equivalent workflows on Wayland, but global shortcuts, clipboard access, and paste automation depend on desktop portals and compositor support. Limitations will be documented clearly.
+
+### Why does paste automation need permissions?
+
+Automatic paste requires Clippo to return focus to the target app and send the platform paste command after you choose a history item. Each operating system handles this differently, so Clippo documents permission requirements per platform.
+
+## License
+
+Clippo is released under the [MIT License](LICENSE).
