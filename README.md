@@ -2,6 +2,10 @@
 
 ![Clippo icon](assets/icon.svg)
 
+[![CI](https://github.com/Hameedhudeen/clippo-clipboard/actions/workflows/ci.yml/badge.svg)](https://github.com/Hameedhudeen/clippo-clipboard/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Hameedhudeen/clippo-clipboard?include_prereleases)](https://github.com/Hameedhudeen/clippo-clipboard/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Clippo is an open-source, cross-platform clipboard history manager for macOS, Windows, and Linux. It is built for people who want a fast keyboard-first clipboard workflow, local-only storage, native desktop behavior, and low background resource usage.
 
 > Status: pre-alpha. Clippo is under active development and is not ready for daily use yet.
@@ -33,8 +37,8 @@ Clippo is currently a pre-alpha open-source project. The shared Rust core and na
 | Shared Rust core | Implemented for history, search, settings, privacy, persistence, commands, lifecycle, localization keys, and diagnostics. |
 | macOS shell | SwiftUI/AppKit scaffold exists; runtime validation still needs macOS and Xcode. |
 | Windows shell | WinForms scaffold exists; runtime validation still needs Windows and the .NET desktop workload. |
-| Linux shell | Rust fallback shell exists for X11/Wayland clipboard paths, zenity dialogs, desktop actions, autostart, and `.deb` packaging. |
-| Releases | No public release artifacts yet. |
+| Linux shell | Rust fallback shell exists for X11/Wayland clipboard paths, zenity dialogs, desktop actions, autostart, Wayland shortcut portal daemon, and Linux package artifacts. |
+| Releases | `v0.1.0` Linux pre-alpha artifacts are published for testing; stable cross-platform releases are pending. |
 
 ## Screenshots
 
@@ -42,7 +46,18 @@ Screenshots and short workflow GIFs will be added after the first native shell i
 
 ## Install
 
-Clippo does not have public downloads yet. For now, contributors should build from source.
+Clippo has a Linux pre-alpha release for tester feedback. It is not ready for daily use yet.
+
+| Artifact | Download |
+| --- | --- |
+| Linux AppImage | [Clippo-0.1.0-x86_64.AppImage](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.0/Clippo-0.1.0-x86_64.AppImage) |
+| Debian package | [clippo_0.1.0_amd64.deb](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.0/clippo_0.1.0_amd64.deb) |
+| Flatpak local repo archive | [clippo-0.1.0-flatpak-repo.tar.gz](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.0/clippo-0.1.0-flatpak-repo.tar.gz) |
+| Checksums | [SHA256SUMS](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.0/SHA256SUMS) |
+
+macOS and Windows downloads are not published yet.
+
+Contributors can also build from source:
 
 ```sh
 git clone https://github.com/Hameedhudeen/clippo-clipboard.git
@@ -50,13 +65,15 @@ cd clippo-clipboard
 scripts/check.sh
 ```
 
-Linux `.deb` packaging has a local scaffold:
+Linux packaging commands:
 
 ```sh
 scripts/package-linux-deb.sh
+scripts/package-linux-appimage.sh
+scripts/package-linux-flatpak.sh
 ```
 
-macOS signing, Windows installer packaging, AppImage, and Flatpak still require target-platform validation before release.
+macOS signing and Windows installer packaging still require target-platform validation before release.
 
 ## Keyboard-First Workflow
 
@@ -89,8 +106,8 @@ Planned default shortcuts:
 | --- | --- | --- |
 | macOS | Native menu bar app | SwiftUI/AppKit source exists; signed bundle validation is pending. |
 | Windows | Native tray app | WinForms source exists; installer and runtime validation are pending. |
-| Linux X11 | Native shell plus fallbacks | Clipboard, paste, shortcut helper, desktop actions, and fallback dialogs exist. |
-| Linux Wayland | Native shell plus documented fallbacks | Clipboard and shortcuts depend on compositor and portal support. |
+| Linux X11 | Native shell plus fallbacks | Clipboard, paste, shortcut helper, desktop actions, packaging, and fallback dialogs exist. |
+| Linux Wayland | Native shell plus documented fallbacks | Clipboard paths and a portal daemon exist; shortcut activation still depends on compositor portal support. |
 
 ## Architecture
 

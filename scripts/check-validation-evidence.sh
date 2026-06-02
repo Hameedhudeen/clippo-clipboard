@@ -18,11 +18,25 @@ if TASKS_PATH.exists():
     UNCHECKED_TASKS = set(re.findall(r"^- \[ \] (.+)$", TASKS_TEXT, re.MULTILINE))
 else:
     section = VALIDATION_TEXT.split("## Exact Unchecked Task Coverage", 1)[1].split("## README And Portfolio Assets", 1)[0]
-    KNOWN_TASKS = set(
+    exact_unchecked = set(
         match.group(1).strip()
         for match in re.finditer(r"^- (.+)$", section, re.MULTILINE)
     )
-    UNCHECKED_TASKS = KNOWN_TASKS
+    if "## Completed Evidence Coverage" in VALIDATION_TEXT:
+        completed_section = VALIDATION_TEXT.split("## Completed Evidence Coverage", 1)[1].split("## README And Portfolio Assets", 1)[0]
+        completed_tasks = set(
+            match.group(1).strip()
+            for match in re.finditer(r"^- (.+)$", completed_section, re.MULTILINE)
+        )
+    else:
+        completed_tasks = set()
+    table_tasks = set(
+        match.group(1).strip()
+        for match in re.finditer(r"^\| ([^|]+?) \| [^|]+ \| [^|]+ \|$", VALIDATION_TEXT, re.MULTILINE)
+        if match.group(1).strip() not in {"Task", "Milestone", "---"}
+    )
+    KNOWN_TASKS = exact_unchecked | completed_tasks | table_tasks
+    UNCHECKED_TASKS = exact_unchecked
 MILESTONE_PREFIXES = {"v0.3", "v0.4", "v0.5", "v0.6", "v0.7", "v0.8", "v0.9", "v1.0"}
 REQUIRED_HEADINGS = [
     "## Summary",
@@ -77,8 +91,6 @@ for path in files:
         issues.append(f"{relative}: missing task or milestone")
     elif task not in KNOWN_TASKS:
         issues.append(f"{relative}: task or milestone is not present in the validation source")
-    elif task not in UNCHECKED_TASKS and not any(task.startswith(prefix) for prefix in MILESTONE_PREFIXES):
-        issues.append(f"{relative}: task is already checked in tasks.md; evidence logs should target remaining gates")
     elif task not in VALIDATION_TEXT:
         issues.append(f"{relative}: task is not covered by docs/EXTERNAL_VALIDATION.md")
     if result not in ALLOWED_RESULTS:

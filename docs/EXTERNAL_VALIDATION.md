@@ -20,15 +20,11 @@ This matrix tracks the remaining tasks that cannot be honestly marked complete f
 These lines are the public source of truth for remaining external validation gates. Local maintainers may mirror them in a private implementation checklist.
 
 - Add screenshots or animated GIFs for each supported OS once UI exists.
-- Add release downloads section linking GitHub Releases when artifacts exist.
-- Add badges only after CI, releases, and license metadata are real.
 - Verify all README links, images, badges, and anchors render correctly on GitHub.
 - Verify behavior with macOS Universal Clipboard.
 - Package as signed app bundle for local testing.
 - Package as MSIX or MSI for local testing.
 - Implement global shortcut support for Wayland through available portals where possible.
-- Package as AppImage for broad testing.
-- Package as Flatpak if portal integration is viable.
 - Keep popup lightweight and fast to open.
 - Verify Clippo's popup before v0.5 for search placement, list density, row spacing, shortcut labels, footer behavior, and visual hierarchy.
 - Verify each OS shell keeps the core workflow while using native system chrome, fonts, colors, focus rings, and accessibility conventions.
@@ -42,7 +38,6 @@ These lines are the public source of truth for remaining external validation gat
 - Select and paste with modifier plus Enter.
 - Select and paste with modifier plus click.
 - Add screenshots for each OS.
-- Add badges only after CI and releases exist.
 - Add high-quality README screenshots or GIFs.
 - Add demo video or animated walkthrough before portfolio launch.
 - Add portfolio case study after first usable release.
@@ -54,6 +49,16 @@ These lines are the public source of truth for remaining external validation gat
 - v0.8 README landing page, documentation, and parity matrix are complete.
 - v0.9 beta release is tested by external users.
 - v1.0 release has signed or checksummed artifacts, install docs, known limitations, and no unchecked v1 parity tasks.
+
+## Completed Evidence Coverage
+
+These gates have committed validation logs or release evidence and should not appear in the exact unchecked list above.
+
+- Add release downloads section linking GitHub Releases when artifacts exist.
+- Add badges only after CI, releases, and license metadata are real.
+- Package as AppImage for broad testing.
+- Package as Flatpak if portal integration is viable.
+- Add badges only after CI and releases exist.
 
 ## README And Portfolio Assets
 

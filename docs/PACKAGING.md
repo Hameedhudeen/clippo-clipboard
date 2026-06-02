@@ -1,6 +1,6 @@
 # Packaging And Distribution
 
-Clippo is still pre-alpha, but local Linux packaging paths now exist for tester builds. This document records the release packaging decisions and the validation still required before stable distribution.
+Clippo is still pre-alpha, but Linux packaging paths now exist for tester builds. The `v0.1.0` pre-release publishes Linux AppImage, `.deb`, Flatpak local repo, and checksum artifacts through GitHub Releases. This document records the release packaging decisions and the validation still required before stable distribution.
 
 ## Package Identity
 
@@ -47,7 +47,7 @@ Run `scripts/package-preflight.sh` on a packaging host before building artifacts
 
 ## Updates
 
-The initial release should use GitHub Releases for downloads. Auto-update is a post-alpha decision because it affects signing, security, and user trust.
+The initial release uses GitHub Releases for downloads. Auto-update is a post-alpha decision because it affects signing, security, and user trust.
 
 ## Signing And Checksums
 
