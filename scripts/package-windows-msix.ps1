@@ -1,7 +1,7 @@
 param(
     [string]$Configuration = "Release",
     [string]$Runtime = "win-x64",
-    [string]$Version = "0.1.1.0"
+    [string]$Version = "0.1.2.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -40,7 +40,7 @@ Copy-Item -Recurse -Force (Join-Path $PublishDir "*") $PackageRoot
 New-Item -ItemType Directory -Force (Join-Path $PackageRoot "Assets") | Out-Null
 
 $Manifest = Get-Content $ManifestTemplate -Raw
-$Manifest = $Manifest.Replace('Version="0.1.1.0"', "Version=`"$Version`"")
+$Manifest = $Manifest -replace 'Version="\d+\.\d+\.\d+\.\d+"', "Version=`"$Version`""
 Set-Content -Path (Join-Path $PackageRoot "AppxManifest.xml") -Value $Manifest -Encoding UTF8
 
 foreach ($Asset in @("StoreLogo.png", "Square44x44Logo.png", "Square150x150Logo.png")) {

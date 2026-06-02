@@ -4,17 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Release version or tag
+        description: Release version or tag, for example v0.1.2
         required: true
 
 jobs:
-  rust-artifacts:
-    name: Rust workspace artifacts
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+  linux:
+    name: Linux alpha packages
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,23 +18,112 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build
-        run: cargo build --workspace --release
+      - name: Install Linux packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          mkdir -p "$HOME/.local/bin"
+          curl -L \
+            -o "$HOME/.local/bin/appimagetool" \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x "$HOME/.local/bin/appimagetool"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: Stage Rust artifacts
+      - name: Install Flatpak runtime
+        run: |
+          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install -y flathub org.gnome.Platform//50 org.gnome.Sdk//50
+
+      - name: Build Linux packages
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        run: |
+          scripts/package-linux-deb.sh
+          scripts/package-linux-appimage.sh
+          scripts/package-linux-flatpak.sh
+
+      - name: Stage Linux release artifacts
         shell: bash
         run: |
+          set -euo pipefail
+          input_version="${{ inputs.version }}"
+          version="${input_version#v}"
+          rm -rf dist/release
           mkdir -p dist/release
-          find target/release -maxdepth 1 -type f \
-            \( -name 'clippo*' -o -name '*.exe' -o -name '*.dll' -o -name '*.dylib' -o -name '*.so' \) \
-            -exec cp {} dist/release/ \;
+          cp "dist/linux/Clippo-${version}-x86_64.AppImage" dist/release/
+          cp "dist/linux/clippo_${version}_amd64.deb" dist/release/
+          tar -C dist/linux -czf "dist/release/clippo-${version}-flatpak-repo.tar.gz" flatpak-repo
 
-      - name: Generate checksums
+      - name: Generate Linux checksums
+        run: scripts/generate-checksums.sh dist/release
+
+      - name: Upload Linux release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: clippo-linux-${{ inputs.version }}
+          path: dist/release/
+
+  macos:
+    name: macOS alpha app bundle
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build macOS app archive
+        run: scripts/package-macos.sh
+
+      - name: Stage macOS release artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          input_version="${{ inputs.version }}"
+          version="${input_version#v}"
+          rm -rf dist/release
+          mkdir -p dist/release
+          cp "dist/macos/Clippo-${version}-macos-alpha.zip" dist/release/
+
+      - name: Generate macOS checksums
+        run: scripts/generate-checksums.sh dist/release
+
+      - name: Upload macOS release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: clippo-macos-${{ inputs.version }}
+          path: dist/release/
+
+  windows:
+    name: Windows alpha zip
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build Windows zip
+        shell: pwsh
+        run: |
+          $Version = "${{ inputs.version }}" -replace "^[vV]", ""
+          ./scripts/package-windows-zip.ps1 -Version $Version
+
+      - name: Stage Windows release artifact
+        shell: pwsh
+        run: |
+          $Version = "${{ inputs.version }}" -replace "^[vV]", ""
+          Remove-Item -Recurse -Force dist/release -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force dist/release | Out-Null
+          Copy-Item "dist/windows/Clippo-$Version-windows-x64-alpha.zip" dist/release/
+
+      - name: Generate Windows checksums
         shell: bash
         run: scripts/generate-checksums.sh dist/release
 
-      - name: Upload release artifacts
+      - name: Upload Windows release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: clippo-rust-${{ matrix.os }}-${{ inputs.version }}
+          name: clippo-windows-${{ inputs.version }}
           path: dist/release/

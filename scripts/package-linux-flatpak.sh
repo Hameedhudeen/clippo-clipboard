@@ -15,13 +15,18 @@ fi
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 build_dir="$repo_root/dist/linux/flatpak-build"
+repo_dir="$repo_root/dist/linux/flatpak-repo"
 manifest="$repo_root/packaging/flatpak/app.clippo.Clippo.yml"
 
 cargo build --package clippo-linux --release
 
+rm -rf "$repo_dir"
+
 flatpak-builder \
   --force-clean \
+  --repo="$repo_dir" \
   "$build_dir" \
   "$manifest"
 
 echo "Built Flatpak directory at $build_dir"
+echo "Exported Flatpak local repo at $repo_dir"

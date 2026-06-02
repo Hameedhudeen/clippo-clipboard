@@ -1,6 +1,6 @@
 # Packaging And Distribution
 
-Clippo is still pre-alpha, but Linux packaging paths now exist for tester builds. The `v0.1.1` pre-release publishes Linux AppImage, `.deb`, Flatpak local repo, and checksum artifacts through GitHub Releases. This document records the release packaging decisions and the validation still required before stable distribution.
+Clippo is alpha software. The `v0.1.2` alpha release publishes Linux AppImage, `.deb`, Flatpak local repo, macOS zipped app bundle, Windows self-contained zip, and checksum artifacts through GitHub Releases. This document records the release packaging decisions and the validation still required before stable distribution.
 
 ## Package Identity
 
@@ -12,8 +12,8 @@ Clippo is still pre-alpha, but Linux packaging paths now exist for tester builds
 
 ## Distribution Targets
 
-- macOS: signed and notarized app bundle, then Homebrew tap or formula.
-- Windows: MSIX or MSI, then winget manifest.
+- macOS: unsigned zipped app bundle for alpha, then signed and notarized app bundle, then Homebrew tap or formula.
+- Windows: self-contained zip for alpha, then signed MSIX or MSI, then winget manifest.
 - Linux: AppImage for broad testing, Flatpak if portal integration is viable, `.deb` for Debian/Ubuntu users.
 - Snap: not a v1 target unless AppImage, Flatpak, and `.deb` do not cover the audience.
 
@@ -25,12 +25,13 @@ Run `scripts/package-preflight.sh` on a packaging host before building artifacts
 - Local app bundle scaffold: run `scripts/package-macos.sh` on macOS to build `dist/macos/Clippo.app` from the Swift package and `apps/macos/Resources/Info.plist`.
 - Sign with an Apple Developer ID certificate.
 - Notarize with Apple notary tooling.
-- Publish a `.dmg` or zipped app bundle through GitHub Releases.
+- Publish a zipped app bundle through GitHub Releases for alpha; move to `.dmg` when signing/notarization is ready.
 - Add a Homebrew formula or tap after the first stable artifact URL is available.
 
 ## Windows Plan
 
-- Build the Windows shell with Windows App SDK tooling.
+- Build the Windows shell with the .NET desktop workload.
+- Publish a self-contained `win-x64` zip for alpha tester feedback.
 - Prefer MSIX if it fits tray/startup behavior; otherwise use MSI.
 - MSIX scaffold: run `scripts/package-windows-msix.ps1` from Windows Developer PowerShell.
 - Windows package PNG assets live under `packaging/windows/Assets/` and can be regenerated with `node tools/generate-windows-assets.mjs`.
@@ -51,7 +52,7 @@ The initial release uses GitHub Releases for downloads. Auto-update is a post-al
 
 ## Signing And Checksums
 
-v1 artifacts should be signed where practical and always published with checksums. Run `scripts/generate-checksums.sh dist` after packaging to write `dist/SHA256SUMS`, or run it against a release-only staging folder to avoid hashing unpacked build directories. The GitHub release workflow stages Rust artifacts under `dist/release` and uploads a `SHA256SUMS` file with each OS artifact bundle.
+v1 artifacts should be signed where practical and always published with checksums. Alpha artifacts are unsigned and must be marked as prereleases. Run `scripts/generate-checksums.sh dist` after packaging to write `dist/SHA256SUMS`, or run it against a release-only staging folder to avoid hashing unpacked build directories. The GitHub release workflow stages user-downloadable artifacts under `dist/release` and uploads a `SHA256SUMS` file.
 
 ## SBOM
 

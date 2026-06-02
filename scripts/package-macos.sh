@@ -18,6 +18,8 @@ app_root="$repo_root/dist/macos/Clippo.app"
 contents="$app_root/Contents"
 macos_dir="$contents/MacOS"
 resources_dir="$contents/Resources"
+version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$repo_root/apps/macos/Resources/Info.plist")"
+archive_path="$repo_root/dist/macos/Clippo-${version}-macos-alpha.zip"
 
 swift build \
   --package-path "$repo_root/apps/macos" \
@@ -37,4 +39,10 @@ cp "$repo_root/apps/macos/Resources/Info.plist" "$contents/Info.plist"
 cp "$repo_root/assets/icon.svg" "$resources_dir/icon.svg"
 
 echo "Created $app_root"
+rm -f "$archive_path"
+(
+  cd "$repo_root/dist/macos"
+  ditto -c -k --sequesterRsrc --keepParent Clippo.app "$archive_path"
+)
+echo "Created $archive_path"
 echo "Signing and notarization are intentionally handled by the release workflow."

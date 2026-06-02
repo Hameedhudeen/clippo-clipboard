@@ -8,7 +8,7 @@
 
 Clippo is an open-source, cross-platform clipboard history manager for macOS, Windows, and Linux. It is built for people who want a fast keyboard-first clipboard workflow, local-only storage, native desktop behavior, and low background resource usage.
 
-> Status: pre-alpha. Clippo is under active development and is not ready for daily use yet.
+> Status: alpha. Clippo is under active development and is not ready for daily use yet.
 
 ## What Clippo Aims To Do
 
@@ -31,15 +31,15 @@ Clippo is designed as a small desktop utility that stays out of the way until yo
 
 ## Project Status
 
-Clippo is currently a pre-alpha open-source project. The shared Rust core and native shell scaffolds exist, but the app still needs target-host validation, production packaging, screenshots, and release artifacts.
+Clippo is currently an alpha open-source project. The shared Rust core and native shell scaffolds exist, but the app still needs broader target-host validation, signing, screenshots, and stable release hardening.
 
 | Area | Status |
 | --- | --- |
 | Shared Rust core | Implemented for history, search, settings, privacy, persistence, commands, lifecycle, localization keys, and diagnostics. |
-| macOS shell | SwiftUI/AppKit scaffold exists; runtime validation still needs macOS and Xcode. |
-| Windows shell | WinForms scaffold exists; runtime validation still needs Windows and the .NET desktop workload. |
+| macOS shell | SwiftUI/AppKit scaffold exists; alpha zipped app bundle publishing is planned through macOS release runners. |
+| Windows shell | WinForms scaffold exists; alpha self-contained zip publishing is planned through Windows release runners. |
 | Linux shell | Rust fallback shell exists for a resident background monitor, X11/Wayland clipboard paths, zenity dialogs with notification fallback, desktop actions, autostart, quit command, Wayland shortcut portal daemon, and Linux package artifacts. |
-| Releases | `v0.1.1` Linux pre-alpha artifacts are published for testing; stable cross-platform releases are pending. |
+| Releases | `v0.1.2` alpha artifacts are published for tester feedback; stable cross-platform releases are pending. |
 
 ## Screenshots
 
@@ -47,16 +47,18 @@ Screenshots and short workflow GIFs will be added after the first native shell i
 
 ## Install
 
-Clippo has a Linux pre-alpha release for tester feedback. It is not ready for daily use yet.
+Clippo has alpha release artifacts for tester feedback. They are not signed or ready for daily use yet.
 
 | Artifact | Download |
 | --- | --- |
-| Linux AppImage | [Clippo-0.1.1-x86_64.AppImage](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.1/Clippo-0.1.1-x86_64.AppImage) |
-| Debian package | [clippo_0.1.1_amd64.deb](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.1/clippo_0.1.1_amd64.deb) |
-| Flatpak local repo archive | [clippo-0.1.1-flatpak-repo.tar.gz](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.1/clippo-0.1.1-flatpak-repo.tar.gz) |
-| Checksums | [SHA256SUMS](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.1/SHA256SUMS) |
+| Linux AppImage | [Clippo-0.1.2-x86_64.AppImage](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.2/Clippo-0.1.2-x86_64.AppImage) |
+| Debian package | [clippo_0.1.2_amd64.deb](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.2/clippo_0.1.2_amd64.deb) |
+| Flatpak local repo archive | [clippo-0.1.2-flatpak-repo.tar.gz](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.2/clippo-0.1.2-flatpak-repo.tar.gz) |
+| macOS app bundle zip | [Clippo-0.1.2-macos-alpha.zip](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.2/Clippo-0.1.2-macos-alpha.zip) |
+| Windows self-contained zip | [Clippo-0.1.2-windows-x64-alpha.zip](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.2/Clippo-0.1.2-windows-x64-alpha.zip) |
+| Checksums | [SHA256SUMS](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.2/SHA256SUMS) |
 
-macOS and Windows downloads are not published yet.
+macOS and Windows alpha downloads are unsigned. Expect normal operating-system warnings until signing and notarization are added.
 
 Contributors can also build from source:
 
@@ -74,7 +76,7 @@ scripts/package-linux-appimage.sh
 scripts/package-linux-flatpak.sh
 ```
 
-macOS signing and Windows installer packaging still require target-platform validation before release.
+macOS signing/notarization and Windows installer signing still require target-platform validation before a stable release.
 
 ## Keyboard-First Workflow
 
