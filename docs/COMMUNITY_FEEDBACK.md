@@ -6,7 +6,7 @@ Clippo should keep feedback focused while the project is pre-alpha.
 
 - Reproducible bugs.
 - Platform-specific behavior reports.
-- Maccy parity gaps.
+- Workflow parity gaps.
 - Accessibility problems.
 - Documentation corrections.
 - Small, well-scoped feature requests.
@@ -24,7 +24,7 @@ Feature requests should explain:
 
 - The workflow problem.
 - The affected operating system.
-- Whether the request is needed for Maccy parity or is a post-v1 enhancement.
+- Whether the request is needed for workflow parity or is a post-v1 enhancement.
 - Any privacy, permission, or performance tradeoff.
 
 ## Discussions

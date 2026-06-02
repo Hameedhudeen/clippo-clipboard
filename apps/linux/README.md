@@ -6,7 +6,7 @@ This folder is the planned native Linux shell for Clippo.
 
 - GTK4/libadwaita.
 - Status notifier or desktop-shell integration where available.
-- Maccy-like compact history popup adapted to Linux desktop conventions.
+- core compact history popup adapted to Linux desktop conventions.
 - X11 support where available.
 - Wayland support through portals where available.
 - Rust shared core through a narrow FFI boundary.

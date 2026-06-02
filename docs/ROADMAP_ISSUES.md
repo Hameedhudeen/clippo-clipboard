@@ -23,10 +23,10 @@ Acceptance criteria:
 
 ### Implement macOS shell workflow parity
 
-Labels: `platform:macos`, `type:feature`, `parity:maccy`
+Labels: `platform:macos`, `type:feature`, `parity:workflow`
 Milestone: `v0.4`
 
-Build the macOS SwiftUI/AppKit shell using the shared Rust core and the Maccy 2.6.1 UI/UX reference.
+Build the macOS SwiftUI/AppKit shell using the shared Rust core and Clippo UI/UX reference.
 
 Acceptance criteria:
 
@@ -38,7 +38,7 @@ Acceptance criteria:
 
 ### Implement Windows shell workflow parity
 
-Labels: `platform:windows`, `type:feature`, `parity:maccy`
+Labels: `platform:windows`, `type:feature`, `parity:workflow`
 Milestone: `v0.4`
 
 Build the Windows native shell with tray integration, global shortcut registration, clipboard monitoring, paste automation, and preferences.
@@ -53,7 +53,7 @@ Acceptance criteria:
 
 ### Implement Linux shell workflow parity
 
-Labels: `platform:linux`, `type:feature`, `parity:maccy`
+Labels: `platform:linux`, `type:feature`, `parity:workflow`
 Milestone: `v0.4`
 
 Build the GTK4/libadwaita Linux shell with desktop-shell integration, clipboard monitoring, shortcut support where available, and Wayland fallback messaging.
@@ -65,14 +65,14 @@ Acceptance criteria:
 - Wayland portal/fallback behavior is implemented where available.
 - Status notifier or desktop-shell integration is implemented or documented as unsupported.
 
-## v0.5 Maccy Parity
+## v0.5 Workflow Parity
 
-### Complete Maccy 2.6.1 parity review
+### Complete Clippo workflow parity review
 
-Labels: `parity:maccy`, `type:task`, `priority:high`
+Labels: `parity:workflow`, `type:task`, `priority:high`
 Milestone: `v0.5`
 
-Re-audit the local Maccy 2.6.1 reference and upstream release notes before declaring Clippo workflow parity.
+Review the documented Clippo workflow scope before declaring cross-platform workflow parity.
 
 Acceptance criteria:
 

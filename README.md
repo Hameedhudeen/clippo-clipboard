@@ -2,13 +2,13 @@
 
 ![Clippo icon](assets/icon.svg)
 
-Clippo is a lightweight, native-feeling clipboard manager for macOS, Windows, and Linux, inspired by [Maccy](https://github.com/p0deje/Maccy).
+Clippo is a lightweight, native-feeling clipboard history manager for macOS, Windows, and Linux.
 
 > Status: pre-alpha. Clippo is not ready for daily use yet.
 
 ## Why Clippo
 
-Maccy is an excellent macOS clipboard manager. Clippo takes that keyboard-first, privacy-conscious workflow as inspiration and aims to bring equivalent native behavior to Windows and Linux as a separate long-term open-source project.
+Clippo is an open-source desktop utility for people who want fast clipboard history, local-first privacy, and native platform behavior without a heavy background app. The project is being built in public with a shared Rust core and native shells for each operating system.
 
 ## Feature Goals
 
@@ -24,6 +24,12 @@ Maccy is an excellent macOS clipboard manager. Clippo takes that keyboard-first,
 - Local-only storage with no telemetry by default.
 - Native-feeling UI for each supported operating system.
 - Low idle memory usage as a first-class engineering goal.
+
+## Open Source Status
+
+Clippo is maintained as a community open-source project. Contributions are welcome in the form of platform testing, documentation fixes, issue triage, accessibility feedback, packaging help, and focused pull requests.
+
+The project is still pre-alpha, so contributors should expect incomplete platform shells and validation tasks that require real macOS, Windows, and Linux hosts.
 
 ## Current Implementation
 
@@ -94,7 +100,7 @@ This direction is intended to keep memory usage low while still giving each OS a
 ## Roadmap
 
 Public roadmap and milestones live in [ROADMAP.md](ROADMAP.md).
-The Maccy parity matrix lives in [docs/PARITY.md](docs/PARITY.md).
+The workflow parity matrix lives in [docs/PARITY.md](docs/PARITY.md).
 Project direction, UI/UX constraints, and v1 non-goals live in [docs/PROJECT_DIRECTION.md](docs/PROJECT_DIRECTION.md).
 Packaging decisions live in [docs/PACKAGING.md](docs/PACKAGING.md).
 Keyboard shortcuts live in [docs/KEYBOARD_SHORTCUTS.md](docs/KEYBOARD_SHORTCUTS.md).
@@ -112,7 +118,7 @@ Current major milestones:
 - v0.2: Tested shared core for history, search, persistence, and settings.
 - v0.3: One native platform shell usable end to end.
 - v0.4: macOS, Windows, and Linux can open, search, copy, and paste history items.
-- v0.5: Core Maccy workflow parity across supported OSes.
+- v0.5: Core clipboard workflow parity across supported OSes.
 - v1.0: Documented, packaged, tested release with known limitations clearly stated.
 
 ## Privacy Goals
@@ -162,16 +168,6 @@ Automatic paste requires Clippo to interact with the active app after you choose
 ### Will Clippo collect telemetry?
 
 No telemetry is planned by default.
-
-### Is Clippo an official Maccy port?
-
-No. Clippo is planned as a separate project inspired by Maccy.
-
-## Maccy Attribution
-
-Clippo is inspired by [Maccy](https://github.com/p0deje/Maccy), a fast and lightweight clipboard manager for macOS. Clippo is planned as a separate cross-platform project, not an official Maccy port.
-
-The initial parity baseline is Maccy 2.6.1, with a local reference copy stored in `references/maccy/2.6.1/source`.
 
 ## Contributing
 

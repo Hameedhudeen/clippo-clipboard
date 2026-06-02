@@ -15,7 +15,7 @@
   description: Maintainer welcomes external help.
 - name: parity
   color: fbca04
-  description: Maccy parity gap or behavior comparison.
+  description: Clippo workflow parity gap or behavior comparison.
 - name: platform: macos
   color: cfd3d7
   description: macOS-specific work.

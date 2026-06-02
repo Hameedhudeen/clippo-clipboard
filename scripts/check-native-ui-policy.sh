@@ -47,7 +47,7 @@ for path in candidate_files():
 
 if findings:
     print("Decorative or custom-drawn UI patterns found in native shell source.")
-    print("Clippo should stay close to Maccy's compact utility UI while using native OS controls.")
+    print("Clippo should stay close to a compact utility UI while using native OS controls.")
     print(f"If a usage is intentional, document it in docs/UI_UX.md and add '{ALLOW_MARKER}' on that source line.")
     print()
     for path, line, label, source in findings:

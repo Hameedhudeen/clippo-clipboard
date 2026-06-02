@@ -6,19 +6,13 @@ These topics are intentionally outside v1 unless the roadmap changes.
 
 Decision: post-v1.
 
-v1 uses fast normalized substring search with ranking. Fuzzy matching can be reconsidered after the core Maccy-like workflow is stable.
+v1 uses fast normalized substring search with ranking. Fuzzy matching can be reconsidered after the core workflow is stable.
 
 ## Encrypted History Storage
 
 Decision: post-v1.
 
 Encrypted storage needs platform keychain integration and recovery/error UX. v1 should first ship a clear local-only storage model, ignored sensitive types, and fast clear-history controls.
-
-## Maccy Data Import
-
-Decision: research complete, implementation deferred.
-
-Maccy 2.6.1 stores history with SwiftData at `Application Support/Maccy/Storage.sqlite`. Importing it would require a macOS-only migration path that understands Maccy's SwiftData schema and pasteboard content model. Clippo should defer this until after core v1 parity.
 
 ## Search And Settings Crate Split
 

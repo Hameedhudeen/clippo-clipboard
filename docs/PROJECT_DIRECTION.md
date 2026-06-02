@@ -1,21 +1,21 @@
 # Project Direction
 
-Clippo is a separate open-source project inspired by Maccy. It is not an official Maccy port and does not target upstream Maccy PRs for the cross-platform rewrite.
+Clippo is a community open-source project for a lightweight, native-feeling clipboard history manager on macOS, Windows, and Linux.
 
 ## v1 Goal
 
-v1 should deliver Maccy-like clipboard manager workflows on macOS, Windows, and Linux using native platform conventions where exact behavior is not possible.
+v1 should deliver the core clipboard history workflow on all supported operating systems using native platform conventions where exact behavior is not possible.
 
 ## UI/UX Target
 
-Clippo should feel familiar to Maccy users:
+Clippo should feel compact, fast, and keyboard-first:
 
 - Compact popup for clipboard history.
 - Search-first interaction when the popup opens.
 - Keyboard-first navigation and selection.
 - Pinned clips visually and behaviorally above regular history.
 - Shortcut hints visible for fast actions.
-- Menu bar, tray, or desktop shell actions equivalent to Maccy's menu actions.
+- Menu bar, tray, or desktop shell actions.
 - Tooltip or native equivalent for delayed full-content preview.
 
 Clippo should not become a generic clipboard dashboard, notes app, or sync product in v1.
@@ -44,7 +44,7 @@ Clippo should not become a generic clipboard dashboard, notes app, or sync produ
 - Plugin system.
 - OCR.
 - AI features.
-- Pixel-perfect Maccy cloning across non-macOS platforms.
+- Pixel-perfect cloning of any existing app.
 - Telemetry by default.
 
 ## Maintainer Expectations
@@ -53,4 +53,4 @@ Clippo should not become a generic clipboard dashboard, notes app, or sync produ
 - Treat privacy, low memory usage, and documented limitations as release gates.
 - Triage platform issues by OS and desktop environment.
 - Prefer small, reviewable PRs.
-- Re-audit Maccy before v1 so parity claims remain current.
+- Re-audit Clippo's own workflow scope before v1 so parity claims remain current.

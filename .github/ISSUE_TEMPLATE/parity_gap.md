@@ -1,14 +1,14 @@
 ---
-name: Maccy parity gap
-about: Track behavior from Maccy that Clippo does not match yet
+name: Workflow parity gap
+about: Track a documented Clippo workflow that is missing or incomplete
 title: "Parity: "
 labels: parity
 assignees: ""
 ---
 
-## Maccy Behavior
+## Expected Workflow
 
-Describe the behavior in Maccy.
+Describe the documented Clippo workflow or platform expectation.
 
 ## Clippo Behavior
 
@@ -16,8 +16,7 @@ Describe what Clippo currently does.
 
 ## Reference
 
-- Maccy baseline: 2.6.1
-- Relevant Maccy docs or source path:
+- Relevant Clippo docs or source path:
 
 ## Platform Scope
 

@@ -8,7 +8,7 @@ Describe the change.
 - [ ] I added or updated tests where practical.
 - [ ] I avoided logging clipboard contents.
 - [ ] I documented OS-specific limitations introduced by this change.
-- [ ] I checked whether this affects Maccy parity.
+- [ ] I checked whether this affects workflow parity.
 
 ## Testing
 

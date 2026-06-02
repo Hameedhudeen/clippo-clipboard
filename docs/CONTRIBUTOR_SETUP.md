@@ -47,4 +47,4 @@ scripts/package-preflight.sh
 - Do not log clipboard contents.
 - Keep platform-specific behavior behind platform traits or native shells.
 - Update the roadmap, documentation, or validation matrix when work is actually completed.
-- Use Maccy 2.6.1 as the v1 parity baseline unless the baseline is intentionally updated.
+- Use the documented Clippo workflow scope as the v1 parity baseline unless the baseline is intentionally updated.

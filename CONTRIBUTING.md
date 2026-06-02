@@ -22,4 +22,4 @@ See `docs/CONTRIBUTOR_SETUP.md` for local setup and check commands.
 
 ## Reference Project
 
-Clippo is inspired by Maccy, but it is a separate project. The current reference baseline is Maccy 2.6.1, stored under `references/maccy/2.6.1/`.
+Clippo is a separate community open-source project. Keep contributions focused on the documented workflow, privacy, performance, and native-platform goals.

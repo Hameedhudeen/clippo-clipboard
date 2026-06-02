@@ -9,9 +9,9 @@ ROOT = Path.cwd()
 
 CHECKS = [
     (
-        "UI docs declare Maccy 2.6.1 reference",
+        "UI docs declare Clippo workflow reference",
         ROOT / "docs/UI_UX.md",
-        "Clippo uses Maccy 2.6.1 as the primary UI/UX reference.",
+        "Clippo uses its own compact, keyboard-first clipboard workflow as the UI/UX reference.",
     ),
     (
         "UI docs preserve compact searchable list",
@@ -29,9 +29,9 @@ CHECKS = [
         "- Pinned section above regular history.",
     ),
     (
-        "Parity docs record Maccy release baseline",
+        "Parity docs record Clippo workflow target",
         ROOT / "docs/PARITY.md",
-        "https://github.com/p0deje/Maccy/releases",
+        "Clippo targets equivalent clipboard workflows on macOS, Windows, and Linux.",
     ),
     (
         "macOS popup search field",
@@ -160,10 +160,10 @@ for label, path, needle in CHECKS:
         missing.append(f"{label}: missing `{needle}` in {path.relative_to(ROOT)}")
 
 if missing:
-    print("Maccy UI parity source checks failed:")
+    print("Clippo workflow UI source checks failed:")
     for item in missing:
         print(f"- {item}")
     sys.exit(1)
 
-print("Maccy UI parity source check passed: search-first, compact list, pinned rows, shortcuts, preview, and actions are represented")
+print("Clippo workflow UI source check passed: search-first, compact list, pinned rows, shortcuts, preview, and actions are represented")
 PY

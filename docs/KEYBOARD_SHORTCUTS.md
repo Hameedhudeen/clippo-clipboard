@@ -1,6 +1,6 @@
 # Keyboard Shortcuts
 
-Clippo's default shortcuts follow Maccy's interaction model and use platform-appropriate labels in native shells.
+Clippo's default shortcuts follow a compact keyboard-first interaction model and use platform-appropriate labels in native shells.
 
 ## Shared Defaults
 

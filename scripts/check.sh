@@ -23,7 +23,7 @@ scripts/check-full-preview-source.sh
 scripts/check-interaction-source.sh
 scripts/check-global-shortcut-source.sh
 scripts/check-layout-scaling-source.sh
-scripts/check-maccy-ui-parity-source.sh
+scripts/check-workflow-ui-source.sh
 scripts/check-popup-positioning-source.sh
 scripts/check-external-validation.sh
 scripts/check-validation-evidence.sh

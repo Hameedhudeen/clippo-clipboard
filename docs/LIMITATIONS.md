@@ -16,4 +16,4 @@ Automatic paste requires macOS Accessibility permission. Future macOS versions m
 
 ## Cross-Platform Parity
 
-Clippo targets equivalent workflows, not pixel-perfect Maccy UI on every OS.
+Clippo targets equivalent workflows, not pixel-perfect cloning of another app on every OS.

@@ -2,7 +2,7 @@
 
 Remaining OS, packaging, release, screenshot, and accessibility gates are mapped to required environments and evidence in [EXTERNAL_VALIDATION.md](EXTERNAL_VALIDATION.md).
 
-## Maccy Parity
+## Workflow Parity
 
 - Open history with global shortcut.
 - Type immediately to search.
@@ -51,6 +51,6 @@ Remaining OS, packaging, release, screenshot, and accessibility gates are mapped
 - Screenshots match current UI.
 - Platform support table matches tested platforms.
 - Privacy claims match implementation.
-- Maccy attribution is present.
+- Open-source positioning is present.
 - Links resolve.
 - No unfinished feature is described as complete.

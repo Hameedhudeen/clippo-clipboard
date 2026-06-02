@@ -30,10 +30,10 @@ These lines are the public source of truth for remaining external validation gat
 - Package as AppImage for broad testing.
 - Package as Flatpak if portal integration is viable.
 - Keep popup lightweight and fast to open.
-- Verify Clippo's popup against Maccy reference captures before v0.5 for search placement, list density, row spacing, shortcut labels, footer behavior, and visual hierarchy.
-- Verify each OS shell keeps the Maccy-like workflow while using native system chrome, fonts, colors, focus rings, and accessibility conventions.
-- Run a side-by-side UI review against Maccy 2.6.1 screenshots before every beta release.
-- Review every platform shell against the Maccy UI/UX reference before marking v0.5 parity complete.
+- Verify Clippo's popup before v0.5 for search placement, list density, row spacing, shortcut labels, footer behavior, and visual hierarchy.
+- Verify each OS shell keeps the core workflow while using native system chrome, fonts, colors, focus rings, and accessibility conventions.
+- Run target-host UI reviews before every beta release.
+- Review every platform shell against the Clippo UI/UX reference before marking v0.5 parity complete.
 - Support screen reader basics for the history list and preferences.
 - Support high contrast mode where the OS exposes it.
 - Verify no text overlaps at common desktop scaling settings.
@@ -48,7 +48,7 @@ These lines are the public source of truth for remaining external validation gat
 - Add portfolio case study after first usable release.
 - v0.3 one platform shell is usable end-to-end.
 - v0.4 all three platform shells can open, search, copy, and paste history items.
-- v0.5 Maccy core workflow parity is implemented on all supported OSes.
+- v0.5 core clipboard workflow parity is implemented on all supported OSes.
 - v0.6 privacy, ignore rules, and settings are implemented.
 - v0.7 packaging exists for all supported OSes.
 - v0.8 README landing page, documentation, and parity matrix are complete.
@@ -97,7 +97,7 @@ These lines are the public source of truth for remaining external validation gat
 
 | Task | Required environment | Evidence needed |
 | --- | --- | --- |
-| Compare popup against Maccy reference | macOS reference plus each Clippo shell | Side-by-side screenshots covering search placement, density, spacing, shortcut labels, footer, and hierarchy |
+| Compare popup against Clippo UI specification | macOS reference plus each Clippo shell | Side-by-side screenshots covering search placement, density, spacing, shortcut labels, footer, and hierarchy |
 | Verify native system chrome and conventions | macOS, Windows, GNOME/KDE | QA notes for fonts, colors, focus rings, title/menu/tray behavior, and accessibility conventions |
 | Screen reader basics | All supported OSes | Screen reader announces history list, rows, selected state, and preferences controls |
 | High contrast mode | Windows and Linux desktops, macOS contrast setting where applicable | Screenshots and QA notes at high contrast/increased contrast settings |
@@ -111,7 +111,7 @@ These lines are the public source of truth for remaining external validation gat
 | --- | --- |
 | v0.3 | One platform shell installed and used end-to-end for open, search, copy, paste, pin, delete, clear, pause, ignore, and preferences |
 | v0.4 | macOS, Windows, and Linux each open, search, copy, and paste history items |
-| v0.5 | Maccy core workflow parity verified on all supported OSes |
+| v0.5 | core clipboard workflow parity verified on all supported OSes |
 | v0.6 | Privacy, ignore rules, and settings verified on all supported OSes |
 | v0.7 | macOS, Windows, and Linux package artifacts exist with checksums |
 | v0.8 | README, screenshots, docs, and parity matrix reflect actual tested state |

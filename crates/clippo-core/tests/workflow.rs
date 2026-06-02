@@ -5,9 +5,9 @@ use clippo_core::{
 };
 
 #[test]
-fn maccy_like_core_workflow_can_search_pin_paste_and_clear() {
+fn core_workflow_can_search_pin_paste_and_clear() {
     let mut history = ClipboardHistory::default();
-    let rules = PrivacyRules::maccy_compatible_defaults();
+    let rules = PrivacyRules::platform_sensitive_defaults();
     let context = clippo_core::CaptureContext {
         format_names: Vec::new(),
         source: None,

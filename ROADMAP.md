@@ -25,7 +25,7 @@ GitHub-ready issue drafts live in `docs/ROADMAP_ISSUES.md`. Milestone and projec
 
 ## v0.5
 
-- Core Maccy workflow parity using OS-appropriate equivalents.
+- Core clipboard workflow parity using OS-appropriate equivalents.
 
 ## v1.0
 

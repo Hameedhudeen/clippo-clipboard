@@ -14,7 +14,7 @@ Until maintainership expands, the maintainer owns release approval, versioning, 
 
 ## Issue Triage
 
-Issues should be labeled by platform, type, severity, and whether they affect Maccy parity.
+Issues should be labeled by platform, type, severity, and whether they affect workflow parity.
 
 ## Community Expectations
 

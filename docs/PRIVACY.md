@@ -12,7 +12,7 @@ Clippo is local-first and should not send clipboard contents over the network by
 
 ## Ignored Content
 
-Clippo starts with Maccy-compatible confidential pasteboard type defaults and adds platform-sensitive format names for Windows and Linux where available.
+Clippo starts with platform-sensitive confidential clipboard type defaults and adds platform-sensitive format names for Windows and Linux where available.
 
 macOS defaults include:
 
@@ -42,7 +42,7 @@ Clippo's main privacy risks are:
 
 v1 mitigations:
 
-- Maccy-compatible ignored pasteboard types.
+- macOS ignored pasteboard types.
 - Windows and Linux sensitive format hooks where platform metadata exists.
 - Pause capture and ignore-next-copy controls.
 - Local-only storage by default.

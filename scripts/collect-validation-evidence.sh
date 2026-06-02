@@ -95,9 +95,9 @@ def evidence_hint(task: str):
     aliases = [
         ("readme links", "Verify README renders on GitHub"),
         ("images, badges, and anchors", "Verify README renders on GitHub"),
-        ("side-by-side ui review", "Compare popup against Maccy reference"),
-        ("popup against maccy", "Compare popup against Maccy reference"),
-        ("maccy ui/ux reference", "Compare popup against Maccy reference"),
+        ("side-by-side ui review", "Compare popup against Clippo UI specification"),
+        ("popup against clippo specification", "Compare popup against Clippo UI specification"),
+        ("clippo ui/ux reference", "Compare popup against Clippo UI specification"),
         ("native system chrome", "Verify native system chrome and conventions"),
         ("screenshot", "Add screenshots or animated GIFs"),
         ("animated gif", "Add screenshots or animated GIFs"),

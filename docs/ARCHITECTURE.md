@@ -31,4 +31,4 @@ Native shells should stay thin. Their job is to render OS-appropriate UI, reques
 
 ## Reference Baseline
 
-Maccy 2.6.1 is stored in `references/maccy/2.6.1/source` as the initial parity reference.
+Clippo workflow parity is tracked in `docs/PARITY.md`; private local references are not part of the public repository.

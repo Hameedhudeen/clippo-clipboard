@@ -4,10 +4,6 @@
 
 Not yet. Clippo is pre-alpha.
 
-## Is Clippo an official Maccy port?
-
-No. Clippo is a separate project inspired by Maccy.
-
 ## Will Clippo support Linux Wayland?
 
 Wayland is a v1 target, but support depends on desktop portals and compositor behavior.

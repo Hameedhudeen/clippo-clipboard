@@ -81,7 +81,7 @@ printf '%s\n' \
   "Installed-Size: $installed_size" \
   'Depends: libc6' \
   'Description: Lightweight native clipboard manager' \
-  ' Clippo is a cross-platform clipboard manager inspired by Maccy.' \
+  ' Clippo is a cross-platform clipboard history manager.' \
   > "$package_root/DEBIAN/control"
 
 dpkg-deb --build "$package_root" "$deb_path"

@@ -9,7 +9,7 @@ The shared core exposes the required localization key list in `clippo-core::LOCA
 - Required for v1: English (`en-US`).
 - Community-supported after v1: additional languages through pull requests.
 
-Maccy 2.6.1 ships broad community localization coverage because it is a mature macOS app. Clippo will not try to match that language list for v1. The v1 target is to keep all user-facing strings externalized, validate pseudo-localized layouts, and make translation pull requests straightforward after the core cross-platform workflow is stable.
+Clippo v1 keeps the language scope intentionally small. The target is to keep all user-facing strings externalized, validate pseudo-localized layouts, and make translation pull requests straightforward after the core cross-platform workflow is stable.
 
 ## File Format
 
