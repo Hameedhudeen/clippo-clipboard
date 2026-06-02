@@ -4,8 +4,13 @@ set -euo pipefail
 artifact_dir="${1:-dist}"
 output_file="${2:-$artifact_dir/SHA256SUMS}"
 
-if ! command -v sha256sum >/dev/null 2>&1; then
-  echo "sha256sum is not installed. Install GNU coreutils before generating release checksums." >&2
+checksum_command=()
+if command -v sha256sum >/dev/null 2>&1; then
+  checksum_command=(sha256sum)
+elif command -v shasum >/dev/null 2>&1; then
+  checksum_command=(shasum -a 256)
+else
+  echo "sha256sum or shasum is required before generating release checksums." >&2
   exit 127
 fi
 
@@ -26,5 +31,5 @@ if [[ "${#artifacts[@]}" -eq 0 ]]; then
   exit 78
 fi
 
-sha256sum "${artifacts[@]}" > "$output_file"
+"${checksum_command[@]}" "${artifacts[@]}" > "$output_file"
 echo "Created $output_file"
