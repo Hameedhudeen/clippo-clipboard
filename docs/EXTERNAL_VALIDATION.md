@@ -20,7 +20,6 @@ This matrix tracks the remaining tasks that cannot be honestly marked complete f
 These lines are the public source of truth for remaining external validation gates. Local maintainers may mirror them in a private implementation checklist.
 
 - Add screenshots or animated GIFs for each supported OS once UI exists.
-- Verify all README links, images, badges, and anchors render correctly on GitHub.
 - Verify behavior with macOS Universal Clipboard.
 - Package as signed app bundle for local testing.
 - Package as MSIX or MSI for local testing.
@@ -56,6 +55,7 @@ These gates have committed validation logs or release evidence and should not ap
 
 - Add release downloads section linking GitHub Releases when artifacts exist.
 - Add badges only after CI, releases, and license metadata are real.
+- Verify all README links, images, badges, and anchors render correctly on GitHub.
 - Package as AppImage for broad testing.
 - Package as Flatpak if portal integration is viable.
 - Add badges only after CI and releases exist.
