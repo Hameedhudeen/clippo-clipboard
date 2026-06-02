@@ -19,13 +19,21 @@ if [[ ! -d "$artifact_dir" ]]; then
   exit 78
 fi
 
+artifact_dir_abs="$(cd "$artifact_dir" && pwd)"
+output_dir="$(dirname "$output_file")"
+output_name="$(basename "$output_file")"
+mkdir -p "$output_dir"
+output_file_abs="$(cd "$output_dir" && pwd)/$output_name"
+
 artifacts=()
 while IFS= read -r artifact; do
   artifacts+=("$artifact")
 done < <(
-  find "$artifact_dir" -type f \
-    ! -name "$(basename "$output_file")" \
-    ! -path '*/.DS_Store' \
+  cd "$artifact_dir_abs"
+  find . -type f \
+    ! -name "$output_name" \
+    ! -path './.DS_Store' \
+    | sed 's#^\./##' \
     | sort
 )
 
@@ -34,5 +42,8 @@ if [[ "${#artifacts[@]}" -eq 0 ]]; then
   exit 78
 fi
 
-"${checksum_command[@]}" "${artifacts[@]}" > "$output_file"
+(
+  cd "$artifact_dir_abs"
+  "${checksum_command[@]}" "${artifacts[@]}"
+) > "$output_file_abs"
 echo "Created $output_file"
