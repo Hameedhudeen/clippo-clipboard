@@ -29,7 +29,7 @@ impl PopupViewModel {
             let row = PopupRow {
                 item_id: item.id,
                 visible_shortcut: item.pinned_shortcut.map_or_else(
-                    || (visible_index + 1).to_string(),
+                    || visible_shortcut_for_index(visible_index).unwrap_or_default(),
                     |shortcut| shortcut.to_string(),
                 ),
                 preview_text: item.preview_text.clone(),
@@ -100,6 +100,13 @@ impl PopupViewModel {
             .find(|row| row.visible_shortcut == shortcut.to_string())
             .map(|row| row.item_id)
     }
+}
+
+fn visible_shortcut_for_index(index: usize) -> Option<String> {
+    "123456789"
+        .chars()
+        .nth(index)
+        .map(|value| value.to_string())
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -218,6 +225,33 @@ mod tests {
         assert_eq!(view_model.item_id_for_visible_shortcut('7'), Some(pinned));
         assert_eq!(view_model.item_id_for_visible_shortcut('2'), Some(regular));
         assert_eq!(view_model.item_id_for_visible_shortcut('9'), None);
+    }
+
+    #[test]
+    fn view_model_omits_unusable_number_shortcuts_after_nine_items() {
+        let mut history = ClipboardHistory::default();
+
+        for index in 1..=10 {
+            history
+                .add_item(
+                    ClipboardContent::Text {
+                        text: format!("item {index}"),
+                    },
+                    TimestampMillis(index),
+                    None,
+                )
+                .unwrap();
+        }
+
+        let view_model = PopupViewModel::from_history(&history, "");
+        let rows = &view_model.sections[0].rows;
+
+        assert_eq!(rows[8].visible_shortcut, "9");
+        assert_eq!(rows[9].visible_shortcut, "");
+        assert_eq!(
+            view_model.item_id_for_visible_shortcut('9'),
+            Some(rows[8].item_id)
+        );
     }
 
     #[test]

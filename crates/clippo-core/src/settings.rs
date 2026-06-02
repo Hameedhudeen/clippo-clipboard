@@ -387,7 +387,7 @@ impl ShortcutSettings {
                 return Err(SettingsError::EmptyShortcut { action });
             }
 
-            if reserved.contains(normalized.as_str()) {
+            if reserved.contains(&normalized) {
                 return Err(SettingsError::ReservedShortcut {
                     action,
                     shortcut: shortcut.to_string(),
@@ -407,18 +407,59 @@ impl ShortcutSettings {
     }
 }
 
-fn reserved_shortcuts() -> HashSet<&'static str> {
-    HashSet::from(["alt+f4", "meta+q", "ctrl+alt+delete"])
+fn reserved_shortcuts() -> HashSet<String> {
+    ["Alt+F4", "Meta+Q", "Ctrl+Alt+Delete"]
+        .into_iter()
+        .map(normalize_shortcut)
+        .collect()
 }
 
 fn normalize_shortcut(value: &str) -> String {
-    value
+    let mut modifiers = Vec::new();
+    let mut keys = Vec::new();
+
+    for part in value
         .split('+')
         .map(str::trim)
         .filter(|part| !part.is_empty())
-        .map(str::to_lowercase)
-        .collect::<Vec<_>>()
-        .join("+")
+        .map(normalize_shortcut_part)
+    {
+        if is_modifier(&part) {
+            if !modifiers.contains(&part) {
+                modifiers.push(part);
+            }
+        } else {
+            keys.push(part);
+        }
+    }
+
+    modifiers.sort_by_key(|modifier| modifier_order(modifier));
+    keys.sort();
+    modifiers.extend(keys);
+    modifiers.join("+")
+}
+
+fn normalize_shortcut_part(value: &str) -> String {
+    match value.to_ascii_lowercase().as_str() {
+        "control" => "ctrl".to_string(),
+        "cmd" | "command" | "super" | "win" | "windows" => "meta".to_string(),
+        "option" => "alt".to_string(),
+        value => value.to_string(),
+    }
+}
+
+fn is_modifier(value: &str) -> bool {
+    matches!(value, "ctrl" | "alt" | "shift" | "meta")
+}
+
+fn modifier_order(value: &str) -> usize {
+    match value {
+        "ctrl" => 0,
+        "alt" => 1,
+        "shift" => 2,
+        "meta" => 3,
+        _ => 4,
+    }
 }
 
 #[cfg(test)]
@@ -447,6 +488,27 @@ mod tests {
         let error = settings.validate().unwrap_err();
 
         assert!(matches!(error, SettingsError::DuplicateShortcut(_)));
+    }
+
+    #[test]
+    fn rejects_shortcuts_with_reordered_modifiers_and_aliases() {
+        let mut settings = ClippoSettings::default();
+        settings.shortcuts.open_history = "Shift+Command+C".to_string();
+        settings.shortcuts.clear_all = "Meta+Shift+C".to_string();
+
+        let error = settings.validate().unwrap_err();
+
+        assert!(matches!(error, SettingsError::DuplicateShortcut(_)));
+    }
+
+    #[test]
+    fn rejects_reserved_shortcuts_with_aliases() {
+        let mut settings = ClippoSettings::default();
+        settings.shortcuts.open_history = "Control+Alt+Delete".to_string();
+
+        let error = settings.validate().unwrap_err();
+
+        assert!(matches!(error, SettingsError::ReservedShortcut { .. }));
     }
 
     #[test]

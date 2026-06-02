@@ -174,12 +174,21 @@ impl ClipboardHistory {
     }
 
     pub fn pin(&mut self, id: ItemId, shortcut: Option<char>) -> Result<(), HistoryError> {
-        let item = self
+        let item_index = self
             .items
-            .iter_mut()
-            .find(|item| item.id == id)
+            .iter()
+            .position(|item| item.id == id)
             .ok_or(HistoryError::NotFound(id))?;
 
+        if let Some(shortcut) = shortcut {
+            for (index, item) in self.items.iter_mut().enumerate() {
+                if index != item_index && item.pinned_shortcut == Some(shortcut) {
+                    item.pinned_shortcut = None;
+                }
+            }
+        }
+
+        let item = &mut self.items[item_index];
         item.pinned = true;
         item.pinned_shortcut = shortcut;
         self.sort_items();
@@ -423,6 +432,38 @@ mod tests {
             history.item_by_pinned_shortcut('7').map(|item| item.id),
             Some(first)
         );
+    }
+
+    #[test]
+    fn keeps_pinned_shortcuts_unique() {
+        let mut history = ClipboardHistory::default();
+        let first = history
+            .add_item(text("first"), TimestampMillis(1), None)
+            .unwrap();
+        let second = history
+            .add_item(text("second"), TimestampMillis(2), None)
+            .unwrap();
+
+        history.pin(first, Some('1')).unwrap();
+        history.pin(second, Some('1')).unwrap();
+
+        assert_eq!(
+            history.item_by_pinned_shortcut('1').map(|item| item.id),
+            Some(second)
+        );
+        assert_eq!(
+            history
+                .items()
+                .iter()
+                .filter(|item| item.pinned_shortcut == Some('1'))
+                .count(),
+            1
+        );
+        assert!(history
+            .items()
+            .iter()
+            .find(|item| item.id == first)
+            .is_some_and(|item| item.pinned && item.pinned_shortcut.is_none()));
     }
 
     #[test]

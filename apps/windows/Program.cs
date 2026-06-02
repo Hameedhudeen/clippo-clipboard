@@ -326,7 +326,7 @@ internal sealed class HistoryWindow : Form
         for (var index = 0; index < rows.Count; index++)
         {
             var item = rows[index];
-            var row = new ListViewItem(item.PinnedShortcut?.ToString() ?? (index + 1).ToString())
+            var row = new ListViewItem(item.PinnedShortcut?.ToString() ?? VisibleShortcutForIndex(index))
             {
                 Tag = item,
                 ToolTipText = item.Text
@@ -432,11 +432,6 @@ internal sealed class HistoryWindow : Form
             app.TogglePin(SelectedItem);
             eventArgs.Handled = true;
         }
-        else if (eventArgs.Alt && eventArgs.KeyCode == Keys.Delete)
-        {
-            app.Delete(SelectedItem);
-            eventArgs.Handled = true;
-        }
         else if (eventArgs.Alt && eventArgs.Control && eventArgs.Shift && eventArgs.KeyCode == Keys.Delete)
         {
             app.ClearAll();
@@ -445,6 +440,11 @@ internal sealed class HistoryWindow : Form
         else if (eventArgs.Alt && eventArgs.Control && eventArgs.KeyCode == Keys.Delete)
         {
             app.ClearUnpinned();
+            eventArgs.Handled = true;
+        }
+        else if (eventArgs.Alt && eventArgs.KeyCode == Keys.Delete)
+        {
+            app.Delete(SelectedItem);
             eventArgs.Handled = true;
         }
     }
@@ -496,6 +496,11 @@ internal sealed class HistoryWindow : Form
         }
 
         return null;
+    }
+
+    private static string VisibleShortcutForIndex(int index)
+    {
+        return index is >= 0 and < 9 ? (index + 1).ToString() : string.Empty;
     }
 
     private void SelectItem(HistoryItem item)

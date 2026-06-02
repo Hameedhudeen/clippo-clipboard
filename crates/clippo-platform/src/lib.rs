@@ -141,28 +141,60 @@ impl SingleInstance {
             fs::create_dir_all(parent).map_err(|error| io_platform_error(&error))?;
         }
 
-        match OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&self.lock_path)
-        {
-            Ok(mut file) => {
-                write!(file, "{}", std::process::id())
-                    .map_err(|error| io_platform_error(&error))?;
-                Ok(LaunchOutcome::PrimaryInstance(SingleInstanceGuard {
-                    lock_path: self.lock_path.clone(),
-                }))
-            }
+        match self.create_lock_guard() {
+            Ok(outcome) => Ok(outcome),
             Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {
-                Ok(LaunchOutcome::FocusExistingInstance)
+                if self.lock_file_has_active_owner()? {
+                    return Ok(LaunchOutcome::FocusExistingInstance);
+                }
+                fs::remove_file(&self.lock_path).map_err(|error| io_platform_error(&error))?;
+                self.create_lock_guard()
+                    .map_err(|error| io_platform_error(&error))
             }
             Err(error) => Err(io_platform_error(&error)),
         }
+    }
+
+    fn create_lock_guard(&self) -> io::Result<LaunchOutcome> {
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&self.lock_path)?;
+        write!(file, "{}", std::process::id())?;
+        Ok(LaunchOutcome::PrimaryInstance(SingleInstanceGuard {
+            lock_path: self.lock_path.clone(),
+        }))
+    }
+
+    fn lock_file_has_active_owner(&self) -> PlatformResult<bool> {
+        let raw_pid =
+            fs::read_to_string(&self.lock_path).map_err(|error| io_platform_error(&error))?;
+        let Ok(pid) = raw_pid.trim().parse::<u32>() else {
+            return Ok(false);
+        };
+        Ok(process_is_running(pid))
     }
 }
 
 fn io_platform_error(error: &io::Error) -> PlatformError {
     PlatformError::new(PlatformErrorCode::Unknown, error.to_string())
+}
+
+fn process_is_running(pid: u32) -> bool {
+    if pid == std::process::id() {
+        return true;
+    }
+    platform_process_is_running(pid)
+}
+
+#[cfg(target_os = "linux")]
+fn platform_process_is_running(pid: u32) -> bool {
+    Path::new("/proc").join(pid.to_string()).exists()
+}
+
+#[cfg(not(target_os = "linux"))]
+fn platform_process_is_running(_pid: u32) -> bool {
+    true
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -447,6 +479,7 @@ impl Default for ClipboardPollingSchedule {
 #[derive(Debug, Default)]
 pub struct ClipboardPoller {
     last_sequence: Option<u64>,
+    last_unsequenced_content: Option<ClipboardContent>,
     schedule: ClipboardPollingSchedule,
 }
 
@@ -455,6 +488,7 @@ impl ClipboardPoller {
     pub fn with_schedule(schedule: ClipboardPollingSchedule) -> Self {
         Self {
             last_sequence: None,
+            last_unsequenced_content: None,
             schedule,
         }
     }
@@ -502,6 +536,11 @@ impl ClipboardPoller {
                     continue;
                 }
                 self.last_sequence = Some(sequence);
+            } else if self.last_unsequenced_content.as_ref() == Some(&snapshot.content) {
+                batch.unchanged_snapshots += 1;
+                continue;
+            } else {
+                self.last_unsequenced_content = Some(snapshot.content.clone());
             }
 
             if !history.should_capture_content(&snapshot.content) {
@@ -906,6 +945,31 @@ mod tests {
     }
 
     #[test]
+    fn poller_treats_repeated_unsequenced_content_as_unchanged() {
+        let mut history = ClipboardHistory::default();
+        let clipboard = FakeClipboard::default();
+        clipboard.snapshot.replace(Some(ClipboardSnapshot {
+            content: ClipboardContent::Text {
+                text: "copy".to_string(),
+            },
+            source_application: None,
+            sequence: None,
+        }));
+        let mut poller = ClipboardPoller::default();
+
+        let first = poller
+            .poll(&clipboard, &mut history, TimestampMillis(1))
+            .unwrap();
+        let second = poller
+            .poll(&clipboard, &mut history, TimestampMillis(2))
+            .unwrap();
+
+        assert_eq!(first, ClipboardPollOutcome::Captured(ItemId(1)));
+        assert_eq!(second, ClipboardPollOutcome::NoChange);
+        assert_eq!(history.items()[0].last_used_at, TimestampMillis(1));
+    }
+
+    #[test]
     fn single_instance_reports_second_launch_as_existing_instance() {
         let lock_path = temp_lock_path();
         let single_instance = SingleInstance::new(&lock_path);
@@ -925,5 +989,18 @@ mod tests {
         let second = single_instance.launch().unwrap();
 
         assert!(matches!(second, LaunchOutcome::PrimaryInstance(_)));
+    }
+
+    #[test]
+    fn single_instance_replaces_corrupt_stale_lock_file() {
+        let lock_path = temp_lock_path();
+        fs::write(&lock_path, "not-a-pid").unwrap();
+        let single_instance = SingleInstance::new(&lock_path);
+
+        let first = single_instance.launch().unwrap();
+        let second = single_instance.launch().unwrap();
+
+        assert!(matches!(first, LaunchOutcome::PrimaryInstance(_)));
+        assert_eq!(second, LaunchOutcome::FocusExistingInstance);
     }
 }

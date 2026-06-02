@@ -1684,7 +1684,9 @@ fn zenity_history_command(history: &[LinuxHistoryItem]) -> DialogCommand {
     for (index, item) in history.iter().enumerate() {
         args.push(
             item.pinned_shortcut
-                .map_or_else(|| (index + 1).to_string(), |shortcut| shortcut.to_string()),
+                .map(|shortcut| shortcut.to_string())
+                .or_else(|| visible_shortcut_for_index(index).map(|shortcut| shortcut.to_string()))
+                .unwrap_or_default(),
         );
         args.push(if item.pinned { "Pinned" } else { "" }.to_string());
         args.push(item.text.clone());
@@ -2465,6 +2467,22 @@ mod tests {
         assert!(command.args.contains(&"7".to_string()));
         assert!(command.args.contains(&"Pinned value".to_string()));
         assert!(command.args.contains(&"Recent value".to_string()));
+    }
+
+    #[test]
+    fn zenity_history_command_omits_unusable_shortcuts_after_nine_rows() {
+        let history = (1..=10)
+            .map(|index| LinuxHistoryItem::new(&format!("item {index}")))
+            .collect::<Vec<_>>();
+
+        let command = zenity_history_command(&history);
+        let item_10_index = command
+            .args
+            .iter()
+            .position(|arg| arg == "item 10")
+            .expect("item 10 should be present");
+
+        assert_eq!(command.args[item_10_index - 2], "");
     }
 
     #[test]
