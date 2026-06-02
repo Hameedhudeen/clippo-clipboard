@@ -19,7 +19,10 @@ if [[ ! -d "$artifact_dir" ]]; then
   exit 78
 fi
 
-mapfile -t artifacts < <(
+artifacts=()
+while IFS= read -r artifact; do
+  artifacts+=("$artifact")
+done < <(
   find "$artifact_dir" -type f \
     ! -name "$(basename "$output_file")" \
     ! -path '*/.DS_Store' \
