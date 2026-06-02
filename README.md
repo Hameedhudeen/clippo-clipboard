@@ -36,9 +36,9 @@ Clippo is currently an alpha open-source project. The shared Rust core and nativ
 | Area | Status |
 | --- | --- |
 | Shared Rust core | Implemented for history, search, settings, privacy, persistence, commands, lifecycle, localization keys, and diagnostics. |
-| macOS shell | SwiftUI/AppKit scaffold exists; alpha zipped app bundle publishing is planned through macOS release runners. |
-| Windows shell | WinForms scaffold exists; alpha self-contained zip publishing is planned through Windows release runners. |
-| Linux shell | Rust fallback shell exists for a resident background monitor, X11/Wayland clipboard paths, zenity dialogs with notification fallback, desktop actions, autostart, quit command, Wayland shortcut portal daemon, and Linux package artifacts. |
+| macOS shell | SwiftUI/AppKit scaffold exists; an unsigned alpha zipped app bundle is published for tester feedback. |
+| Windows shell | WinForms scaffold exists; an unsigned self-contained alpha zip is published for tester feedback. |
+| Linux shell | Rust fallback shell exists for a resident background monitor, X11/Wayland clipboard paths, zenity dialogs with notification fallback, desktop actions, autostart, quit command, Wayland shortcut portal daemon, and published alpha package artifacts. |
 | Releases | `v0.1.2` alpha artifacts are published for tester feedback; stable cross-platform releases are pending. |
 
 ## Screenshots
@@ -190,7 +190,7 @@ Before opening a pull request, read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs
 
 ### Is Clippo ready to use?
 
-Not yet. Clippo is pre-alpha. It has shared core code and platform scaffolds, but full native UI validation, packaging, and release artifacts are still in progress.
+Clippo is available as an alpha release for tester feedback. It is not recommended as a daily-driver clipboard manager yet because full native UI validation, signing, notarization, and stable release hardening are still in progress.
 
 ### Will Clippo collect telemetry?
 
