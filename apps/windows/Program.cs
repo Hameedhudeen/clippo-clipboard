@@ -124,7 +124,7 @@ internal sealed class ClippoApplicationContext : ApplicationContext
         RefreshUi();
     }
 
-    public void IgnoreNextCopy()
+    public void IgnoreNextClipboardCopy()
     {
         ignoreNextCopy = true;
         RefreshUi();
@@ -250,7 +250,7 @@ internal sealed class ClippoApplicationContext : ApplicationContext
         menu.Items.Add("Preferences", null, (_, _) => ShowPreferences());
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Pause Capture", null, (_, _) => ToggleCapturePaused());
-        menu.Items.Add("Ignore Next Copy", null, (_, _) => IgnoreNextCopy());
+        menu.Items.Add("Ignore Next Copy", null, (_, _) => IgnoreNextClipboardCopy());
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Clear Unpinned", null, (_, _) => ClearUnpinned());
         menu.Items.Add("Clear All", null, (_, _) => ClearAll());
@@ -418,7 +418,7 @@ internal sealed class HistoryWindow : Form
         footer.Controls.Add(Button("Delete", (_, _) => app.Delete(SelectedItem)));
         footer.Controls.Add(Button("Clear", (_, _) => app.ClearUnpinned()));
         footer.Controls.Add(Button("Pause", (_, _) => app.ToggleCapturePaused()));
-        footer.Controls.Add(Button("Ignore", (_, _) => app.IgnoreNextCopy()));
+        footer.Controls.Add(Button("Ignore", (_, _) => app.IgnoreNextClipboardCopy()));
         footer.Controls.Add(Button("Prefs", (_, _) => app.ShowPreferences()));
         return footer;
     }

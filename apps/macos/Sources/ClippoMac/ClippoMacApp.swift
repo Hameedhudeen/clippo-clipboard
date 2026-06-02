@@ -148,14 +148,14 @@ final class ClippoMacModel: ObservableObject {
         requestNotificationAuthorization()
         let workspaceNotifications = NSWorkspace.shared.notificationCenter
         notificationObservers.append(workspaceNotifications.addObserver(
-            name: NSWorkspace.willSleepNotification,
+            forName: NSWorkspace.willSleepNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
             self?.workspaceWillSleep()
         })
         notificationObservers.append(workspaceNotifications.addObserver(
-            name: NSWorkspace.didWakeNotification,
+            forName: NSWorkspace.didWakeNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
@@ -603,6 +603,52 @@ struct ClippoMacHistoryItem: Identifiable, Equatable, Codable {
     var pinned = false
     var pinnedShortcut: Character?
     var createdAt = Date()
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case text
+        case pinned
+        case pinnedShortcut
+        case createdAt
+    }
+
+    init(
+        id: UUID = UUID(),
+        text: String,
+        pinned: Bool = false,
+        pinnedShortcut: Character? = nil,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.text = text
+        self.pinned = pinned
+        self.pinnedShortcut = pinnedShortcut
+        self.createdAt = createdAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        text = try container.decode(String.self, forKey: .text)
+        pinned = try container.decodeIfPresent(Bool.self, forKey: .pinned) ?? false
+        if let shortcut = try container.decodeIfPresent(String.self, forKey: .pinnedShortcut) {
+            pinnedShortcut = shortcut.first
+        } else {
+            pinnedShortcut = nil
+        }
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(text, forKey: .text)
+        try container.encode(pinned, forKey: .pinned)
+        if let pinnedShortcut {
+            try container.encode(String(pinnedShortcut), forKey: .pinnedShortcut)
+        }
+        try container.encode(createdAt, forKey: .createdAt)
+    }
 }
 
 final class MacHistoryStore {
