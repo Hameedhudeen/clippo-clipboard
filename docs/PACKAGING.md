@@ -1,6 +1,6 @@
 # Packaging And Distribution
 
-Clippo is still pre-alpha, but Linux packaging paths now exist for tester builds. The `v0.1.0` pre-release publishes Linux AppImage, `.deb`, Flatpak local repo, and checksum artifacts through GitHub Releases. This document records the release packaging decisions and the validation still required before stable distribution.
+Clippo is still pre-alpha, but Linux packaging paths now exist for tester builds. The `v0.1.1` pre-release publishes Linux AppImage, `.deb`, Flatpak local repo, and checksum artifacts through GitHub Releases. This document records the release packaging decisions and the validation still required before stable distribution.
 
 ## Package Identity
 

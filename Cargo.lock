@@ -204,7 +204,7 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 
 [[package]]
 name = "clippo-bench"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clippo-core",
  "clippo-persistence",
@@ -212,7 +212,7 @@ dependencies = [
 
 [[package]]
 name = "clippo-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -221,7 +221,7 @@ dependencies = [
 
 [[package]]
 name = "clippo-linux"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clippo-core",
  "clippo-platform",
@@ -230,7 +230,7 @@ dependencies = [
 
 [[package]]
 name = "clippo-persistence"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clippo-core",
  "serde",
@@ -239,7 +239,7 @@ dependencies = [
 
 [[package]]
 name = "clippo-platform"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clippo-core",
 ]

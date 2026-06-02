@@ -38,7 +38,7 @@ Clippo is currently a pre-alpha open-source project. The shared Rust core and na
 | macOS shell | SwiftUI/AppKit scaffold exists; runtime validation still needs macOS and Xcode. |
 | Windows shell | WinForms scaffold exists; runtime validation still needs Windows and the .NET desktop workload. |
 | Linux shell | Rust fallback shell exists for X11/Wayland clipboard paths, zenity dialogs with notification fallback, desktop actions, autostart, Wayland shortcut portal daemon, and Linux package artifacts. |
-| Releases | `v0.1.0` Linux pre-alpha artifacts are published for testing; stable cross-platform releases are pending. |
+| Releases | `v0.1.1` Linux pre-alpha artifacts are published for testing; stable cross-platform releases are pending. |
 
 ## Screenshots
 
@@ -50,10 +50,10 @@ Clippo has a Linux pre-alpha release for tester feedback. It is not ready for da
 
 | Artifact | Download |
 | --- | --- |
-| Linux AppImage | [Clippo-0.1.0-x86_64.AppImage](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.0/Clippo-0.1.0-x86_64.AppImage) |
-| Debian package | [clippo_0.1.0_amd64.deb](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.0/clippo_0.1.0_amd64.deb) |
-| Flatpak local repo archive | [clippo-0.1.0-flatpak-repo.tar.gz](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.0/clippo-0.1.0-flatpak-repo.tar.gz) |
-| Checksums | [SHA256SUMS](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.0/SHA256SUMS) |
+| Linux AppImage | [Clippo-0.1.1-x86_64.AppImage](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.1/Clippo-0.1.1-x86_64.AppImage) |
+| Debian package | [clippo_0.1.1_amd64.deb](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.1/clippo_0.1.1_amd64.deb) |
+| Flatpak local repo archive | [clippo-0.1.1-flatpak-repo.tar.gz](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.1/clippo-0.1.1-flatpak-repo.tar.gz) |
+| Checksums | [SHA256SUMS](https://github.com/Hameedhudeen/clippo-clipboard/releases/download/v0.1.1/SHA256SUMS) |
 
 macOS and Windows downloads are not published yet.
 
