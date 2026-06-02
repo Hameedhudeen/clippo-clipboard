@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using Microsoft.Win32;
 
 namespace Clippo.Windows;
@@ -22,16 +23,16 @@ internal sealed class ClippoApplicationContext : ApplicationContext
     private readonly HistoryWindow historyWindow;
     private readonly PreferencesWindow preferencesWindow;
     private readonly ClipboardMessageWindow messageWindow;
+    private readonly HistoryStore historyStore = new();
     private readonly List<HistoryItem> history = [];
     private bool capturePaused;
     private bool ignoreNextCopy;
     private bool suppressNextClipboardCapture;
+    private bool isExiting;
 
     public ClippoApplicationContext()
     {
-        history.Add(new HistoryItem("Clippo native Windows shell scaffold", pinned: true));
-        history.Add(new HistoryItem("Search-first popup model"));
-        history.Add(new HistoryItem("Tray, hotkey, clipboard, and paste API scaffold"));
+        history.AddRange(historyStore.Load());
 
         historyWindow = new HistoryWindow(this);
         preferencesWindow = new PreferencesWindow(this);
@@ -51,10 +52,12 @@ internal sealed class ClippoApplicationContext : ApplicationContext
     public bool CapturePaused => capturePaused;
     public bool IgnoreNextCopy => ignoreNextCopy;
     public bool LaunchAtLogin => StartupRegistration.IsEnabled();
+    public bool IsExiting => isExiting;
 
     public void ShowHistory()
     {
         historyWindow.RefreshItems();
+        historyWindow.WindowState = FormWindowState.Normal;
         historyWindow.StartPosition = FormStartPosition.Manual;
         historyWindow.Location = PopupPlacement.NearCursor(historyWindow.Size);
         historyWindow.Show();
@@ -110,6 +113,7 @@ internal sealed class ClippoApplicationContext : ApplicationContext
             history.Insert(0, new HistoryItem(text));
         }
 
+        SaveHistory();
         RefreshUi();
     }
 
@@ -173,6 +177,7 @@ internal sealed class ClippoApplicationContext : ApplicationContext
             item.Pinned = true;
             item.PinnedShortcut = NextPinnedShortcut();
         }
+        SaveHistory();
         RefreshUi();
     }
 
@@ -184,18 +189,21 @@ internal sealed class ClippoApplicationContext : ApplicationContext
         }
 
         history.Remove(item);
+        SaveHistory();
         RefreshUi();
     }
 
     public void ClearUnpinned()
     {
         history.RemoveAll(item => !item.Pinned);
+        SaveHistory();
         RefreshUi();
     }
 
     public void ClearAll()
     {
         history.Clear();
+        SaveHistory();
         RefreshUi();
     }
 
@@ -210,6 +218,13 @@ internal sealed class ClippoApplicationContext : ApplicationContext
         trayIcon.BalloonTipTitle = title;
         trayIcon.BalloonTipText = body;
         trayIcon.ShowBalloonTip(3000);
+    }
+
+    public void ExitClippo()
+    {
+        isExiting = true;
+        SaveHistory();
+        ExitThread();
     }
 
     protected override void Dispose(bool disposing)
@@ -238,7 +253,7 @@ internal sealed class ClippoApplicationContext : ApplicationContext
         menu.Items.Add("Clear Unpinned", null, (_, _) => ClearUnpinned());
         menu.Items.Add("Clear All", null, (_, _) => ClearAll());
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("Exit", null, (_, _) => ExitThread());
+        menu.Items.Add("Exit", null, (_, _) => ExitClippo());
         return menu;
     }
 
@@ -261,6 +276,18 @@ internal sealed class ClippoApplicationContext : ApplicationContext
             var shortcut => shortcut
         };
     }
+
+    private void SaveHistory()
+    {
+        historyStore.Save(history);
+    }
+
+    protected override void ExitThreadCore()
+    {
+        isExiting = true;
+        SaveHistory();
+        base.ExitThreadCore();
+    }
 }
 
 internal sealed class HistoryWindow : Form
@@ -277,6 +304,7 @@ internal sealed class HistoryWindow : Form
         Height = 560;
         AutoScaleMode = AutoScaleMode.Dpi;
         KeyPreview = true;
+        ShowInTaskbar = false;
 
         search.Dock = DockStyle.Top;
         search.PlaceholderText = "Search clipboard history";
@@ -302,6 +330,8 @@ internal sealed class HistoryWindow : Form
         Controls.Add(search);
 
         KeyDown += OnKeyDown;
+        FormClosing += OnFormClosing;
+        Resize += OnResize;
         RefreshItems();
     }
 
@@ -473,6 +503,28 @@ internal sealed class HistoryWindow : Form
         }
     }
 
+    private void OnFormClosing(object? sender, FormClosingEventArgs eventArgs)
+    {
+        if (app.IsExiting || eventArgs.CloseReason != CloseReason.UserClosing)
+        {
+            return;
+        }
+
+        eventArgs.Cancel = true;
+        Hide();
+    }
+
+    private void OnResize(object? sender, EventArgs eventArgs)
+    {
+        if (WindowState != FormWindowState.Minimized)
+        {
+            return;
+        }
+
+        Hide();
+        WindowState = FormWindowState.Normal;
+    }
+
     private HistoryItem? ItemForNumberKey(Keys keyCode)
     {
         var digit = keyCode switch
@@ -538,6 +590,7 @@ internal sealed class PreferencesWindow : Form
         Width = 420;
         Height = 240;
         AutoScaleMode = AutoScaleMode.Dpi;
+        ShowInTaskbar = false;
 
         var layout = new FlowLayoutPanel
         {
@@ -564,12 +617,24 @@ internal sealed class PreferencesWindow : Form
         };
 
         Controls.Add(layout);
+        FormClosing += OnFormClosing;
     }
 
     public void RefreshState()
     {
         launchAtLogin.Checked = app.LaunchAtLogin;
         pauseCapture.Checked = app.CapturePaused;
+    }
+
+    private void OnFormClosing(object? sender, FormClosingEventArgs eventArgs)
+    {
+        if (app.IsExiting || eventArgs.CloseReason != CloseReason.UserClosing)
+        {
+            return;
+        }
+
+        eventArgs.Cancel = true;
+        Hide();
     }
 }
 
@@ -611,13 +676,100 @@ internal sealed class ClipboardMessageWindow : NativeWindow, IDisposable
     }
 }
 
-internal sealed class HistoryItem(string text, bool pinned = false)
+internal sealed class HistoryItem
 {
-    public Guid Id { get; } = Guid.NewGuid();
-    public string Text { get; } = text;
-    public bool Pinned { get; set; } = pinned;
-    public char? PinnedShortcut { get; set; } = pinned ? '1' : null;
-    public DateTimeOffset LastUsedAt { get; set; } = DateTimeOffset.Now;
+    public HistoryItem(
+        string text,
+        bool pinned = false,
+        Guid? id = null,
+        char? pinnedShortcut = null,
+        DateTimeOffset? lastUsedAt = null
+    )
+    {
+        Id = id ?? Guid.NewGuid();
+        Text = text;
+        Pinned = pinned;
+        PinnedShortcut = pinnedShortcut ?? (pinned ? '1' : null);
+        LastUsedAt = lastUsedAt ?? DateTimeOffset.Now;
+    }
+
+    public Guid Id { get; }
+    public string Text { get; }
+    public bool Pinned { get; set; }
+    public char? PinnedShortcut { get; set; }
+    public DateTimeOffset LastUsedAt { get; set; }
+}
+
+internal sealed class PersistedHistoryItem
+{
+    public Guid Id { get; set; }
+    public string Text { get; set; } = string.Empty;
+    public bool Pinned { get; set; }
+    public char? PinnedShortcut { get; set; }
+    public DateTimeOffset LastUsedAt { get; set; }
+}
+
+internal sealed class HistoryStore
+{
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true
+    };
+
+    private readonly string filePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "Clippo",
+        "history.json"
+    );
+
+    public List<HistoryItem> Load()
+    {
+        if (!File.Exists(filePath))
+        {
+            return [];
+        }
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var persisted = JsonSerializer.Deserialize<List<PersistedHistoryItem>>(json, JsonOptions) ?? [];
+            return persisted
+                .Where(item => !string.IsNullOrWhiteSpace(item.Text))
+                .Select(item => new HistoryItem(
+                    item.Text,
+                    item.Pinned,
+                    item.Id == Guid.Empty ? null : item.Id,
+                    item.PinnedShortcut,
+                    item.LastUsedAt == default ? null : item.LastUsedAt
+                ))
+                .ToList();
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    public void Save(IEnumerable<HistoryItem> history)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            var persisted = history.Select(item => new PersistedHistoryItem
+            {
+                Id = item.Id,
+                Text = item.Text,
+                Pinned = item.Pinned,
+                PinnedShortcut = item.PinnedShortcut,
+                LastUsedAt = item.LastUsedAt
+            });
+            File.WriteAllText(filePath, JsonSerializer.Serialize(persisted, JsonOptions));
+        }
+        catch
+        {
+            // Clipboard contents are intentionally not logged here.
+        }
+    }
 }
 
 internal static class PopupPlacement
@@ -653,7 +805,7 @@ internal static class StartupRegistration
 
         if (enabled)
         {
-            key.SetValue(ValueName, Application.ExecutablePath);
+            key.SetValue(ValueName, $"\"{Application.ExecutablePath}\"");
         }
         else
         {

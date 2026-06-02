@@ -26,7 +26,7 @@ Clippo is designed as a small desktop utility that stays out of the way until yo
 - Configure ignored clipboard types and privacy rules.
 - Store data locally with no telemetry by default.
 - Use native-feeling macOS, Windows, and Linux interfaces.
-- Stay lightweight as an always-running background utility.
+- Stay lightweight as an always-running menu bar, tray, or desktop-shell utility until explicitly quit.
 
 ## Project Status
 
@@ -37,7 +37,7 @@ Clippo is currently a pre-alpha open-source project. The shared Rust core and na
 | Shared Rust core | Implemented for history, search, settings, privacy, persistence, commands, lifecycle, localization keys, and diagnostics. |
 | macOS shell | SwiftUI/AppKit scaffold exists; runtime validation still needs macOS and Xcode. |
 | Windows shell | WinForms scaffold exists; runtime validation still needs Windows and the .NET desktop workload. |
-| Linux shell | Rust fallback shell exists for X11/Wayland clipboard paths, zenity dialogs with notification fallback, desktop actions, autostart, Wayland shortcut portal daemon, and Linux package artifacts. |
+| Linux shell | Rust fallback shell exists for a resident background monitor, X11/Wayland clipboard paths, zenity dialogs with notification fallback, desktop actions, autostart, quit command, Wayland shortcut portal daemon, and Linux package artifacts. |
 | Releases | `v0.1.1` Linux pre-alpha artifacts are published for testing; stable cross-platform releases are pending. |
 
 ## Screenshots
@@ -105,9 +105,9 @@ Planned default shortcuts:
 | Platform | Target | Current notes |
 | --- | --- | --- |
 | macOS | Native menu bar app | SwiftUI/AppKit source exists; signed bundle validation is pending. |
-| Windows | Native tray app | WinForms source exists; installer and runtime validation are pending. |
-| Linux X11 | Native shell plus fallbacks | Clipboard, paste, shortcut helper, desktop actions, packaging, and fallback dialogs exist. |
-| Linux Wayland | Native shell plus documented fallbacks | Clipboard paths and a portal daemon exist; shortcut activation still depends on compositor portal support. |
+| Windows | Native tray app | WinForms source exists; tray lifecycle is implemented; installer and runtime validation are pending. |
+| Linux X11 | Native shell plus fallbacks | Resident monitor, clipboard, paste, shortcut helper, desktop actions, packaging, and fallback dialogs exist. |
+| Linux Wayland | Native shell plus documented fallbacks | Resident monitor, clipboard paths, manual paste fallback, and a portal daemon exist; shortcut activation still depends on compositor portal support. |
 
 ## Architecture
 

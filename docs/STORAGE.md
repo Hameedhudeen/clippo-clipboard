@@ -16,9 +16,9 @@ Clippo's initial local storage format is JSON with explicit schema versioning. T
 
 Expected locations:
 
-- macOS: Application Support directory.
-- Windows: AppData directory.
-- Linux: XDG data/config directories.
+- macOS shell: `~/Library/Application Support/Clippo/history.json`.
+- Windows shell: `%LOCALAPPDATA%\Clippo\history.json`.
+- Linux fallback shell: `$XDG_STATE_HOME/clippo/linux-history`, or `~/.local/state/clippo/linux-history` when `XDG_STATE_HOME` is not set.
 
 Backup procedure:
 
@@ -32,7 +32,7 @@ Restore procedure:
 2. Replace the Clippo JSON store with the backup copy.
 3. Start Clippo and let schema migration run if needed.
 
-Exact platform paths must be finalized when native shells choose their app data directories.
+The shared `clippo-persistence` JSON schema remains the intended v1 storage contract once the native shells are fully wired through the shared core/FFI boundary.
 
 ## Clearing Stored Data
 

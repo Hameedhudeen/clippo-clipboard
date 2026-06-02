@@ -3,6 +3,10 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::thread;
+use std::time::Duration;
+
+use clippo_platform::{LaunchOutcome, SingleInstance};
 
 #[cfg(target_os = "linux")]
 use std::collections::HashMap;
@@ -17,8 +21,8 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let autostart = XdgAutostart::from_environment();
     let state_store = LinuxShellStateStore::from_environment();
-    if should_open_history_by_default(&args) {
-        show_history(&state_store);
+    if should_start_background_by_default(&args) || args.iter().any(|arg| arg == "--background") {
+        run_background_monitor(&state_store);
         return;
     }
     if args.iter().any(|arg| arg == "--status") {
@@ -43,7 +47,7 @@ fn handle_shell_command(
         || handle_clipboard_command(args, state_store)
 }
 
-fn should_open_history_by_default(args: &[String]) -> bool {
+fn should_start_background_by_default(args: &[String]) -> bool {
     args.len() == 1
 }
 
@@ -144,6 +148,10 @@ fn handle_state_command(args: &[String], state_store: &LinuxShellStateStore) -> 
     }
     if args.iter().any(|arg| arg == "--preferences") {
         show_preferences(state_store);
+        return true;
+    }
+    if args.iter().any(|arg| arg == "--quit") {
+        stop_background_monitor(state_store);
         return true;
     }
     if args.iter().any(|arg| arg == "--wayland-shortcuts-status") {
@@ -306,8 +314,13 @@ fn toggle_history_pin_shortcut(state_store: &LinuxShellStateStore, shortcut: cha
 fn show_preferences(state_store: &LinuxShellStateStore) {
     match state_store.load() {
         Ok(state) => {
+            let background_state = if state_store.background_is_running() {
+                "running"
+            } else {
+                "not running"
+            };
             let body = format!(
-                "Capture paused: {}\nIgnore next copy: {}\nState file: {}",
+                "Background monitor: {background_state}\nCapture paused: {}\nIgnore next copy: {}\nState file: {}",
                 state.capture_paused,
                 state.ignore_next_copy,
                 state_store.state_path().display()
@@ -318,6 +331,105 @@ fn show_preferences(state_store: &LinuxShellStateStore) {
         }
         Err(error) => eprintln!("Could not load Linux preferences: {error}"),
     }
+}
+
+fn run_background_monitor(state_store: &LinuxShellStateStore) {
+    let instance = SingleInstance::new(state_store.background_lock_path());
+    let _guard = match instance.launch() {
+        Ok(LaunchOutcome::PrimaryInstance(guard)) => guard,
+        Ok(LaunchOutcome::FocusExistingInstance) => {
+            println!("Clippo background monitor is already running.");
+            return;
+        }
+        Err(error) => {
+            eprintln!(
+                "Could not start Clippo background monitor: {}",
+                error.message
+            );
+            return;
+        }
+    };
+
+    println!("Clippo background monitor is running. Use `clippo-linux --quit` to stop it.");
+    let _ = notify(
+        "Running in Background",
+        "Clipboard history capture is active. Use Quit Clippo to stop it.",
+    );
+
+    monitor_clipboard_until_exit(state_store);
+}
+
+fn monitor_clipboard_until_exit(state_store: &LinuxShellStateStore) {
+    let mut monitor = ClipboardMonitor::default();
+    let mut last_error: Option<String> = None;
+
+    loop {
+        if !should_skip_clipboard_capture(state_store) {
+            match capture_current_clipboard_text(&mut monitor) {
+                Ok(Some(text)) => {
+                    last_error = None;
+                    if let Err(error) = state_store.add_history_text(&text) {
+                        eprintln!("Could not save Linux history item: {error}");
+                    }
+                }
+                Ok(None) => {
+                    last_error = None;
+                }
+                Err(error) => {
+                    let message = error.to_string();
+                    if last_error.as_deref() != Some(message.as_str()) {
+                        eprintln!("Could not monitor Linux clipboard: {message}");
+                        last_error = Some(message);
+                    }
+                }
+            }
+        }
+
+        thread::sleep(background_poll_interval());
+    }
+}
+
+fn capture_current_clipboard_text(monitor: &mut ClipboardMonitor) -> io::Result<Option<String>> {
+    let session = SessionKind::detect();
+    let Some(backend) = LinuxClipboardBackend::for_session(session) else {
+        return Ok(None);
+    };
+
+    monitor.poll_changed(|| backend.read_text())
+}
+
+fn background_poll_interval() -> Duration {
+    Duration::from_millis(500)
+}
+
+fn stop_background_monitor(state_store: &LinuxShellStateStore) {
+    match state_store.background_pid() {
+        Ok(Some(pid)) if pid == std::process::id() => {
+            println!("Clippo background monitor is this process.");
+        }
+        Ok(Some(pid)) if process_is_running(pid) => {
+            match Command::new("kill").arg(pid.to_string()).status() {
+                Ok(status) if status.success() => {
+                    println!("Requested Clippo background monitor shutdown.");
+                }
+                Ok(_) => eprintln!("Could not stop Clippo background monitor."),
+                Err(error) => eprintln!("Could not stop Clippo background monitor: {error}"),
+            }
+        }
+        Ok(Some(_)) => {
+            println!("Clippo background monitor was not running.");
+            let _ = fs::remove_file(state_store.background_lock_path());
+        }
+        Ok(None) => println!("Clippo background monitor is not running."),
+        Err(error) => eprintln!("Could not inspect Clippo background monitor: {error}"),
+    }
+}
+
+fn process_is_running(pid: u32) -> bool {
+    if pid == std::process::id() {
+        return true;
+    }
+    Path::new("/proc").join(pid.to_string()).exists()
 }
 
 fn delete_history_text(state_store: &LinuxShellStateStore, text: &str) {
@@ -514,6 +626,10 @@ fn print_status(autostart: &XdgAutostart, state_store: &LinuxShellStateStore) {
     let desktop = DesktopEnvironment::detect();
     println!("Clippo Linux shell scaffold");
     println!("Autostart enabled: {}", autostart.is_enabled());
+    println!(
+        "Background monitor running: {}",
+        state_store.background_is_running()
+    );
     println!("Capture paused: {}", state.capture_paused);
     println!("Ignore next copy: {}", state.ignore_next_copy);
     println!("Desktop shell: {}", desktop.name());
@@ -1576,6 +1692,29 @@ impl LinuxShellStateStore {
     fn history_path(&self) -> PathBuf {
         self.state_home.join("clippo").join("linux-history")
     }
+
+    fn background_lock_path(&self) -> PathBuf {
+        self.state_home.join("clippo").join("linux-background.lock")
+    }
+
+    fn background_pid(&self) -> io::Result<Option<u32>> {
+        let path = self.background_lock_path();
+        if !path.exists() {
+            return Ok(None);
+        }
+        let pid = fs::read_to_string(path)?
+            .trim()
+            .parse::<u32>()
+            .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?;
+        Ok(Some(pid))
+    }
+
+    fn background_is_running(&self) -> bool {
+        self.background_pid()
+            .ok()
+            .flatten()
+            .is_some_and(process_is_running)
+    }
 }
 
 fn serialize_state_file(state: LinuxShellState) -> String {
@@ -1986,7 +2125,7 @@ fn notify_missing_dialog_backend(context: &str) {
 
 fn desktop_entry(executable_path: &Path) -> String {
     format!(
-        "[Desktop Entry]\nType=Application\nName=Clippo\nComment=Native clipboard manager\nExec={}\nTerminal=false\nX-GNOME-Autostart-enabled=true\n",
+        "[Desktop Entry]\nType=Application\nName=Clippo\nComment=Native clipboard manager\nExec={} --background\nTerminal=false\nX-GNOME-Autostart-enabled=true\n",
         executable_path.display()
     )
 }
@@ -2420,7 +2559,7 @@ mod tests {
     }
 
     #[test]
-    fn xdg_autostart_writes_and_removes_desktop_file() {
+    fn xdg_autostart_writes_background_desktop_file_and_removes_it() {
         let root = env::temp_dir().join(format!(
             "clippo-autostart-test-{}",
             SystemTime::now()
@@ -2441,7 +2580,7 @@ mod tests {
         let contents = fs::read_to_string(autostart.desktop_file_path())
             .expect("autostart file should be readable");
         assert!(contents.contains("Type=Application"));
-        assert!(contents.contains("Exec=/usr/bin/clippo-linux"));
+        assert!(contents.contains("Exec=/usr/bin/clippo-linux --background"));
 
         autostart
             .set_enabled(executable, false)
@@ -2452,14 +2591,31 @@ mod tests {
     }
 
     #[test]
-    fn no_args_open_history_by_default_but_status_is_explicit() {
-        assert!(should_open_history_by_default(
-            &["clippo-linux".to_string()]
-        ));
-        assert!(!should_open_history_by_default(&[
+    fn no_args_start_background_by_default_but_status_is_explicit() {
+        assert!(should_start_background_by_default(&[
+            "clippo-linux".to_string()
+        ]));
+        assert!(!should_start_background_by_default(&[
             "clippo-linux".to_string(),
             "--status".to_string()
         ]));
+    }
+
+    #[test]
+    fn background_lock_path_uses_linux_state_home() {
+        let store = LinuxShellStateStore {
+            state_home: PathBuf::from("/tmp/clippo-state"),
+        };
+
+        assert_eq!(
+            store.background_lock_path(),
+            PathBuf::from("/tmp/clippo-state/clippo/linux-background.lock")
+        );
+    }
+
+    #[test]
+    fn background_poll_interval_matches_clipboard_polling_default() {
+        assert_eq!(background_poll_interval(), Duration::from_millis(500));
     }
 
     #[test]

@@ -9,6 +9,7 @@ Install:
 - Download the signed and notarized app bundle from GitHub Releases.
 - Move Clippo to Applications.
 - Grant Accessibility permission if automatic paste is enabled.
+- Enable Launch at Login in preferences if Clippo should start automatically.
 
 Uninstall:
 
@@ -35,9 +36,11 @@ Uninstall:
 Install:
 
 - Use AppImage for broad testing, Flatpak where portal integration is viable, or `.deb` for Debian/Ubuntu systems.
+- Run `clippo-linux --enable-autostart` if Clippo should start automatically in background mode after sign-in.
 
 Uninstall:
 
 - Quit Clippo.
+- Run `clippo-linux --disable-autostart` if autostart was enabled.
 - Remove the installed package or AppImage.
 - Remove stored Clippo data from the XDG data/config directories if desired.

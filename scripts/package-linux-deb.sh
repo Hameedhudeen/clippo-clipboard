@@ -39,11 +39,11 @@ printf '%s\n' \
   'Type=Application' \
   'Name=Clippo' \
   'Comment=Native clipboard manager' \
-  'Exec=clippo-linux --show-history' \
+  'Exec=clippo-linux --background' \
   'Icon=app.clippo.Clippo' \
   'Terminal=false' \
   'Categories=Utility;' \
-  'Actions=OpenHistory;PauseCapture;IgnoreNextCopy;ClearUnpinned;ClearAll;Preferences;' \
+  'Actions=OpenHistory;PauseCapture;IgnoreNextCopy;ClearUnpinned;ClearAll;Preferences;Quit;' \
   '' \
   '[Desktop Action OpenHistory]' \
   'Name=Open History' \
@@ -68,6 +68,10 @@ printf '%s\n' \
   '[Desktop Action Preferences]' \
   'Name=Preferences' \
   'Exec=clippo-linux --preferences' \
+  '' \
+  '[Desktop Action Quit]' \
+  'Name=Quit Clippo' \
+  'Exec=clippo-linux --quit' \
   > "$package_root/usr/share/applications/app.clippo.Clippo.desktop"
 
 installed_size="$(du -sk "$package_root/usr" | cut -f1)"

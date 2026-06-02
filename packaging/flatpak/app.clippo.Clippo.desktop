@@ -2,11 +2,11 @@
 Type=Application
 Name=Clippo
 Comment=Native clipboard manager
-Exec=clippo-linux --show-history
+Exec=clippo-linux --background
 Icon=app.clippo.Clippo
 Terminal=false
 Categories=Utility;
-Actions=OpenHistory;PauseCapture;IgnoreNextCopy;ClearUnpinned;ClearAll;Preferences;
+Actions=OpenHistory;PauseCapture;IgnoreNextCopy;ClearUnpinned;ClearAll;Preferences;Quit;
 
 [Desktop Action OpenHistory]
 Name=Open History
@@ -31,3 +31,7 @@ Exec=clippo-linux --clear-all
 [Desktop Action Preferences]
 Name=Preferences
 Exec=clippo-linux --preferences
+
+[Desktop Action Quit]
+Name=Quit Clippo
+Exec=clippo-linux --quit

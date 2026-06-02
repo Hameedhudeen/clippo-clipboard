@@ -1,20 +1,24 @@
 # Linux User Guide
 
-Clippo for Linux is not implemented yet. This guide defines the intended v1 user workflow.
+Clippo for Linux has a pre-alpha fallback shell today. The final native GTK4/libadwaita popup is still pending, so this guide separates the current fallback workflow from the intended v1 native workflow.
 
 ## Launch
 
-Clippo should integrate with the desktop shell through status notifier, tray, or a documented fallback.
+Current packages start a resident background monitor from the desktop launcher or `clippo-linux --background`. The final shell should integrate through status notifier, tray, or a documented desktop-shell fallback where the environment supports it.
+
+## Background And Startup
+
+The background monitor reads the supported Linux clipboard backend, writes history to the XDG state directory, and keeps running until stopped with `clippo-linux --quit` or the Quit Clippo desktop action. `clippo-linux --enable-autostart` registers Clippo under XDG autostart with background mode enabled.
 
 ## Open Clipboard History
 
-Use the global shortcut or shell integration to open the compact history popup. Search should be focused immediately.
+Use the desktop action, `clippo-linux --show-history`, or an installed X11 shortcut to open history. The current fallback opens a zenity search entry first, then a filtered zenity list. If zenity is unavailable, Clippo falls back to a desktop notification instead of silently exiting.
 
 ## Select And Paste
 
-- Press Enter or click an item to select it.
-- Use the platform paste shortcut where the desktop environment allows automation.
-- Use paste-without-formatting to paste plain text from rich content.
+- In the fallback dialog, type a search term, press Enter, select a result, then choose Copy, Paste, Paste Without Formatting, Show Full Text, Pin or Unpin, or Delete.
+- X11 can use command shortcuts for copy, paste, plain paste, pin/unpin, and delete where helper tools are installed.
+- Wayland sessions may fall back to copying the selected text and asking the user to paste manually, depending on portals and compositor policy.
 
 ## Manage History
 
@@ -32,3 +36,7 @@ Wayland behavior depends on portals and compositor support. Clippo should docume
 ## Troubleshooting
 
 See `docs/WAYLAND.md`, `docs/TROUBLESHOOTING.md`, and `docs/LIMITATIONS.md`.
+
+## Validation Status
+
+The Linux fallback keeps the workflow testable and now has a resident background monitor, but it is not the final native UI. The GTK4/libadwaita popup, status notifier integration, GNOME/KDE visual validation, screen reader checks, fractional scaling checks, and Wayland shortcut activation evidence are still required before Linux UI/UX parity can be claimed.

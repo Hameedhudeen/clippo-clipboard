@@ -24,6 +24,7 @@ These lines are the public source of truth for remaining external validation gat
 - Package as signed app bundle for local testing.
 - Package as MSIX or MSI for local testing.
 - Implement global shortcut support for Wayland through available portals where possible.
+- Implement native GTK4/libadwaita main history popup for Linux.
 - Keep popup lightweight and fast to open.
 - Verify Clippo's popup before v0.5 for search placement, list density, row spacing, shortcut labels, footer behavior, and visual hierarchy.
 - Verify each OS shell keeps the core workflow while using native system chrome, fonts, colors, focus rings, and accessibility conventions.
@@ -94,6 +95,7 @@ These gates have committed validation logs or release evidence and should not ap
 | Task | Required environment | Evidence needed |
 | --- | --- | --- |
 | Wayland global shortcuts through portals | GNOME or KDE Wayland with `org.freedesktop.portal.GlobalShortcuts` | QA log showing portal availability, bind result, activation signal, and history popup opening |
+| Native GTK4/libadwaita main history popup | Linux development host with GTK4/libadwaita and GNOME/KDE target-host validation | Source implementation plus screenshots or QA log showing search focus, compact rows, pinned/history separation, shortcut hints, actions, native theme inheritance, and fallback behavior |
 | Package as AppImage | Linux host with `appimagetool` | `.AppImage` artifact, launch result, and checksum |
 | Package as Flatpak | Linux host with `flatpak-builder` and portal testing setup | Flatpak build directory or bundle, install result, portal behavior notes, and checksum |
 | Keep popup lightweight and fast to open | Target Linux desktop plus macOS and Windows equivalents | Measured popup latency under the target in `docs/PERFORMANCE_TARGETS.md` |

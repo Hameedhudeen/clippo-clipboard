@@ -83,6 +83,12 @@ Adapt per OS:
 - Windows should use tray expectations and Windows shortcut labels.
 - Linux should use GTK/libadwaita conventions and document tray/status notifier limitations.
 
+## Current Implementation Snapshot
+
+As of the current pre-alpha source state, macOS and Windows have native shell scaffolds that follow this workflow in source, but they still need target-host visual validation before UI/UX parity can be claimed. The Linux shell currently uses a zenity-backed fallback dialog plus desktop notifications when the dialog backend is unavailable. That fallback keeps the core workflow testable, but it is not the final native GTK/libadwaita popup and should not be treated as visually complete.
+
+Do not mark cross-platform UI/UX parity complete from source checks alone. The remaining proof needs target-host screenshots or recordings that compare search placement, density, row spacing, shortcut labels, footer/actions, native chrome, focus behavior, accessibility basics, text scaling, and popup placement on macOS, Windows, Linux X11, and Linux Wayland where feasible.
+
 ## Native UI Policy
 
 Clippo should keep the compact utility feel of a native desktop tool while using native controls on each operating system. The platform shells should avoid decorative gradients, blur layers, heavy shadows, custom-drawn backgrounds, and pill-shaped ornamental chrome unless there is a documented OS reason.

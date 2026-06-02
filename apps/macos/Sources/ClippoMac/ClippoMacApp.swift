@@ -135,18 +135,39 @@ final class ClippoMacModel: ObservableObject {
     @Published var ignoreNextCopy = false
     @Published var launchAtLogin = SMAppService.mainApp.status == .enabled
     @Published var selectedItemID: UUID?
-    @Published var items: [ClippoMacHistoryItem] = [
-        ClippoMacHistoryItem(text: "Clippo native shell scaffold"),
-        ClippoMacHistoryItem(text: "Search-first popup model"),
-        ClippoMacHistoryItem(text: "Pinned example", pinned: true, pinnedShortcut: "1"),
-    ]
+    @Published var items: [ClippoMacHistoryItem] = []
+    private let historyStore = MacHistoryStore()
     private var pasteboardChangeCount = NSPasteboard.general.changeCount
     private var clipboardTimer: Timer?
     private var globalHotKey: GlobalHotKey?
+    private var notificationObservers: [NSObjectProtocol] = []
 
     init() {
+        items = historyStore.load()
         startClipboardMonitoring()
         requestNotificationAuthorization()
+        let workspaceNotifications = NSWorkspace.shared.notificationCenter
+        notificationObservers.append(workspaceNotifications.addObserver(
+            name: NSWorkspace.willSleepNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.workspaceWillSleep()
+        })
+        notificationObservers.append(workspaceNotifications.addObserver(
+            name: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.workspaceDidWake()
+        })
+        notificationObservers.append(NotificationCenter.default.addObserver(
+            forName: NSApplication.willTerminateNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.saveHistory()
+        })
         globalHotKey = GlobalHotKey(keyCode: UInt32(kVK_ANSI_C), modifiers: UInt32(cmdKey | shiftKey)) { [weak self] in
             self?.showHistoryWindow()
         }
@@ -155,6 +176,10 @@ final class ClippoMacModel: ObservableObject {
     deinit {
         clipboardTimer?.invalidate()
         globalHotKey?.unregister()
+        for observer in notificationObservers {
+            NotificationCenter.default.removeObserver(observer)
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        }
     }
 
     var filteredItems: [ClippoMacHistoryItem] {
@@ -253,6 +278,7 @@ final class ClippoMacModel: ObservableObject {
         } else {
             items.insert(ClippoMacHistoryItem(text: text), at: 0)
         }
+        saveHistory()
     }
 
     var selectedItem: ClippoMacHistoryItem? {
@@ -366,6 +392,7 @@ final class ClippoMacModel: ObservableObject {
             items[index].pinned = true
             items[index].pinnedShortcut = nextPinnedShortcut()
         }
+        saveHistory()
         notify(title: items[index].pinned ? "Pinned" : "Unpinned", body: preview(items[index].text))
     }
 
@@ -381,6 +408,7 @@ final class ClippoMacModel: ObservableObject {
         if selectedItemID == item.id {
             selectedItemID = nil
         }
+        saveHistory()
         notify(title: "Deleted", body: preview(item.text))
     }
 
@@ -393,12 +421,14 @@ final class ClippoMacModel: ObservableObject {
 
     func clearUnpinned() {
         items.removeAll { !$0.pinned }
+        saveHistory()
         notify(title: "Cleared", body: "Unpinned clipboard history was cleared.")
     }
 
     func clearAll() {
         items.removeAll()
         selectedItemID = nil
+        saveHistory()
         notify(title: "Cleared", body: "All clipboard history was cleared.")
     }
 
@@ -445,6 +475,21 @@ final class ClippoMacModel: ObservableObject {
     private func nextPinnedShortcut() -> Character? {
         let used = Set(items.compactMap(\.pinnedShortcut))
         return "123456789".first { !used.contains($0) }
+    }
+
+    private func saveHistory() {
+        historyStore.save(items)
+    }
+
+    private func workspaceWillSleep() {
+        clipboardTimer?.invalidate()
+        clipboardTimer = nil
+        saveHistory()
+    }
+
+    private func workspaceDidWake() {
+        pasteboardChangeCount = NSPasteboard.general.changeCount
+        startClipboardMonitoring()
     }
 }
 
@@ -525,12 +570,50 @@ private func fourCharCode(_ string: String) -> OSType {
     }
 }
 
-struct ClippoMacHistoryItem: Identifiable, Equatable {
-    let id = UUID()
+struct ClippoMacHistoryItem: Identifiable, Equatable, Codable {
+    var id = UUID()
     var text: String
     var pinned = false
     var pinnedShortcut: Character?
     var createdAt = Date()
+}
+
+final class MacHistoryStore {
+    private let fileURL: URL
+    private let fileManager: FileManager
+
+    init(fileManager: FileManager = .default) {
+        self.fileManager = fileManager
+        let baseDirectory = fileManager
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)
+            .first ?? fileManager.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")
+        let appDirectory = baseDirectory.appendingPathComponent("Clippo", isDirectory: true)
+        fileURL = appDirectory.appendingPathComponent("history.json")
+    }
+
+    func load() -> [ClippoMacHistoryItem] {
+        guard let data = try? Data(contentsOf: fileURL) else {
+            return []
+        }
+
+        let decoder = JSONDecoder()
+        return (try? decoder.decode([ClippoMacHistoryItem].self, from: data)) ?? []
+    }
+
+    func save(_ items: [ClippoMacHistoryItem]) {
+        do {
+            try fileManager.createDirectory(
+                at: fileURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            let data = try encoder.encode(items)
+            try data.write(to: fileURL, options: .atomic)
+        } catch {
+            // Clipboard contents are intentionally not logged here.
+        }
+    }
 }
 
 struct HistoryPopupView: View {
